@@ -24,6 +24,12 @@ public class Product {
     //商品展示图
     private String image;
     
+    //商品摘要
+    private String summary;
+    
+    //商品正文
+    private String detail;
+    
     //商品发布的卖家
     @ManyToOne(fetch = FetchType.LAZY)
     private Seller seller;
@@ -54,6 +60,22 @@ public class Product {
 
 	public Long getId() {
 		return id;
+	}
+
+	public String getSummary() {
+		return summary;
+	}
+
+	public void setSummary(String summary) {
+		this.summary = summary;
+	}
+
+	public String getDetail() {
+		return detail;
+	}
+
+	public void setDetail(String detail) {
+		this.detail = detail;
 	}  
 
 }

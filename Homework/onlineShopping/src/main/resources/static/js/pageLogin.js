@@ -1,6 +1,6 @@
-(function(w,d,u){
+(function(w, d, u) {
 	var loginForm = util.get('loginForm');
-	if(!loginForm){
+	if (!loginForm) {
 		return;
 	}
 	var userName = loginForm['userName'];
@@ -8,41 +8,53 @@
 	var isSubmiting = false;
 	var loading = new Loading();
 	var page = {
-		init:function(){
-			loginForm.addEventListener('submit',function(e){
-				if(!isSubmiting && this.check()){
+		init : function() {
+			loginForm.addEventListener('submit', function(e) {
+				if (!isSubmiting && this.check()) {
 					var value1 = userName.value;
 					var value2 = md5(password.value);
 					isSubmiting = true;
 					loading.show();
 					ajax({
-						data:{userName:value1,password:value2},
-						url:'/api/login',
-						success:function(result){
-							loading.hide();
-							location.href = '/';
+						data : {
+							userName : value1,
+							password : value2
 						},
-						error:function(message){
-							loading.result(message||'登录失败');
+						url : '/api/login',
+						success : function(result) {
+							if (!result) {
+								loading.result('帐号或密码有误');
+								isSubmiting = false;
+							}
+
+							else {
+								loading.hide();
+								location.href = '/';
+							}
+
+						},
+						error : function(message) {
+							loading.result(message || '登录失败');
 							isSubmiting = false;
 						}
 					});
 				}
-			}.bind(this),false);
-			[userName,password].forEach(function(item){
-				item.addEventListener('input',function(e){
+			}.bind(this), false);
+			[ userName, password ].forEach(function(item) {
+				item.addEventListener('input', function(e) {
 					item.classList.remove('z-err');
-				}.bind(this),false);
+				}.bind(this), false);
 			}.bind(this));
 		},
-		check:function(){
+		check : function() {
 			var result = true;
-			[
-				[userName,function(value){return value == ''}],
-				[password,function(value){return value == ''}]
-			].forEach(function(item){
+			[ [ userName, function(value) {
+				return value == ''
+			} ], [ password, function(value) {
+				return value == ''
+			} ] ].forEach(function(item) {
 				var value = item[0].value.trim();
-				if(item[1](value)){
+				if (item[1](value)) {
 					item[0].classList.add('z-err');
 					result = false;
 				}
@@ -52,4 +64,4 @@
 		}
 	};
 	page.init();
-})(window,document);
+})(window, document);
