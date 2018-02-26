@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 
 import com.netease.homework.onlineShopping.domain.Buyer;
+import com.netease.homework.onlineShopping.domain.Product;
 import com.netease.homework.onlineShopping.domain.Seller;
 import com.netease.homework.onlineShopping.repository.BuyerRepository;
 import com.netease.homework.onlineShopping.repository.ProductRepository;
@@ -43,6 +44,17 @@ public class Initialization implements ApplicationListener<ContextRefreshedEvent
 				buyer.setUsername("buyer");
 				buyer.setPassword(getMD5("reyub"));
 				buyerRepository.saveAndFlush(buyer);
+			}
+			if(productRepository.count()==0)
+			{
+				Product product=new Product();
+				product.setTitle("11");
+				product.setSummary("11");
+				product.setPrice(1.0);
+				product.setDetail("11");
+				product.setImage("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1519626552671&di=1757241c633408b937f12340e23b4c73&imgtype=0&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01e8a157f86d8ca84a0d304fcb9943.jpg%402o.jpg");
+				product.setSeller(sellerRepository.findById((long) 1));
+				productRepository.saveAndFlush(product);
 			}
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();

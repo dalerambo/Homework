@@ -10,42 +10,58 @@
             <ul>
                 <li <#if listType != 1>class="z-sel"</#if> ><a href="/">所有内容</a></li>
                 <#if user?? && user.usertype == 1><li <#if listType == 1>class="z-sel"</#if> ><a href="/?type=1">未购买的内容</a></li></#if>
+                <#if user?? && user.usertype == 0><li <#if listType == 1>class="z-sel"</#if> ><a href="/?type=1">您发布的内容</a></li></#if>
             </ul>
         </div>
     </div>
-    <#if !productList?? || !productList?has_content>
+    <#if !productViewList?? || !productViewList?has_content>
     <div class="n-result">
         <h3>暂无内容！</h3>
     </div>
     <#else>
     <div class="n-plist">
         <ul class="f-cb" id="plist">
-        <#if user?? && user.usertype == 0 && listType == 1>
-            <#list productList as x>
+        <#-- <#if user?? && user.usertype == 1 && listType == 1>
+            <#list productViewList as x>
                 <#if !x.isBuy>
-                <li id="p-${x.id}">
-                    <a href="/show?id=${x.id}" class="link">
-                        <div class="img"><img src="${x.image}" alt="${x.title}"></div>
-                        <h3>${x.title}</h3>
-                        <div class="price"><span class="v-unit">¥</span><span class="v-value">${x.price}</span></div>
+                <li id="p-${x.product.id}">
+                    <a href="/show?id=${x.product.id}" class="link">
+                        <div class="img"><img src="${x.product.image}" alt="${x.product.title}"></div>
+                        <h3>${x.product.title}</h3>
+                        <div class="price"><span class="v-unit">¥</span><span class="v-value">${x.product.price}</span></div>
                     </a>
                 </li>
                 </#if>
             </#list>
         <#else>
-            <#list productList as x>
-                <li id="p-${x.id}">
-                    <a href="/show?id=${x.id}" class="link">
-                        <div class="img"><img src="${x.image}" alt="${x.title}"></div>
-                        <h3>${x.title}</h3>
-                        <div class="price"><span class="v-unit">¥</span><span class="v-value">${x.price}</span></div>
-                        <#if user?? && user.usertype==0 && x.isBuy><span class="had"><b>已购买</b></span></#if>
-                        <#if user?? && user.usertype==1 && x.isSell><span class="had"><b>已售出</b></span></#if>
+            <#list productViewList as x>
+                <li id="p-${x.product.id}">
+                    <a href="/show?id=${x.product.id}" class="link">
+                        <div class="img"><img src="${x.product.image}" alt="${x.product.title}"></div>
+                        <h3>${x.product.title}</h3>
+                        <div class="price"><span class="v-unit">¥</span><span class="v-value">${x.product.price}</span></div>
+                        <#if user?? && user.usertype==1 && x.isBuy?? && x.isBuy><span class="had"><b>已购买</b></span></#if>
+                        <#if user?? && user.usertype==0 && x.isSell?? && x.isSell><span class="had"><b>已售出</b></span></#if>
                     </a>
-                    <#if user?? && user.usertype==1 && !x.isSell><span class="u-btn u-btn-normal u-btn-xs del" data-del="${x.id}">删除</span></#if>
+                    <#if user?? && user.usertype==0 && x.isSell?? && !x.isSell><span class="u-btn u-btn-normal u-btn-xs del" data-del="${x.id}">删除</span></#if>
                 </li>
             </#list>
-        </#if>
+        </#if> -->
+        
+            <#list productViewList as x>
+	            <#if !(user?? && user.usertype == 1 && listType == 1 && x.isBuy)>
+	                <li id="p-${x.product.id}">
+	                    <a href="/show?id=${x.product.id}" class="link">
+	                        <div class="img"><img src="${x.product.image}" alt="${x.product.title}"></div>
+	                        <h3>${x.product.title}</h3>
+	                        <div class="price"><span class="v-unit">¥</span><span class="v-value">${x.product.price}</span></div>
+	                        <#if user?? && user.usertype==1 && x.isBuy?? && x.isBuy><span class="had"><b>已购买</b></span></#if>
+	                        <#if user?? && user.usertype==0 && x.isSell?? && x.isSell><span class="had"><b>已售出</b></span></#if>
+	                    </a>
+	                    <#if user?? && user.usertype==0 && x.isSell?? && !x.isSell><span class="u-btn u-btn-normal u-btn-xs del" data-del="${x.product.id}">删除</span></#if>
+	                </li>
+                </#if>
+            </#list>
         </ul>
     </div>
     </#if>

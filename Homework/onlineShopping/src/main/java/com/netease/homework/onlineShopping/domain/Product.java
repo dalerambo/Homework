@@ -30,6 +30,9 @@ public class Product {
     //商品正文
     private String detail;
     
+    //商品当前价格
+    private Double price;
+    
     //商品发布的卖家
     @ManyToOne(fetch = FetchType.LAZY)
     private Seller seller;
@@ -76,6 +79,15 @@ public class Product {
 
 	public void setDetail(String detail) {
 		this.detail = detail;
-	}  
+	}
+
+	public Double getPrice() {
+		return price;
+	}
+
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+
 
 }

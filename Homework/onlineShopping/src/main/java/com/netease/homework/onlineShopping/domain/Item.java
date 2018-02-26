@@ -7,12 +7,13 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
 //商品项目类
 @Entity
-public class Item {
+public abstract class Item {
 
     @Id
     @GeneratedValue
@@ -31,7 +32,7 @@ public class Item {
     
     //商品项目购买时的价格
     private Double price;
-    
+
     public Product getProduct() {
 		return product;
 	}
@@ -68,5 +69,6 @@ public class Item {
 		return id;
 	}
 
-
+	//用户类型，0表示购物车项目，1表示已购买的账务项目
+	public abstract int getItemtype();
 }

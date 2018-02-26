@@ -5,7 +5,7 @@
 <#include "/include/support.ftl">
 <#include "/include/header.ftl">
 <div class="g-doc">
-    <#if !product>
+    <#if !product??>
     <div class="n-result">
         <h3>内容不存在！</h3>
     </div>
@@ -19,7 +19,7 @@
                 <span class="v-unit">¥</span><span class="v-value">${product.price}</span>
             </div>
             <div class="oprt f-cb">
-                <#if user && user.usertype==0>
+                <#if user?? && user.usertype==0>
                     <#if product.isBuy>
                     <span class="u-btn u-btn-primary z-dis">已购买</span>
                     <span class="buyprice">当时购买价格：¥${product.buyPrice}</span>

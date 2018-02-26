@@ -15,8 +15,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.netease.homework.onlineShopping.domain.Product;
+import com.netease.homework.onlineShopping.domain.ProductView;
+import com.netease.homework.onlineShopping.domain.Seller;
+import com.netease.homework.onlineShopping.domain.Buyer;
+import com.netease.homework.onlineShopping.domain.Item;
 import com.netease.homework.onlineShopping.domain.User;
 import com.netease.homework.onlineShopping.repository.BuyerRepository;
+import com.netease.homework.onlineShopping.repository.AccountItemRepository;
+import com.netease.homework.onlineShopping.repository.ProductRepository;
 import com.netease.homework.onlineShopping.repository.SellerRepository;
 
 @Controller
@@ -29,15 +35,16 @@ public class MainController {
     @Autowired
 	private BuyerRepository buyerRepository;
     
+    @Autowired
+	private ProductRepository productRepository;
+    
+    @Autowired
+	private AccountItemRepository accountItemRepository;
+    
 	@RequestMapping(value = "/")
     public ModelAndView index(ModelAndView modelAndView, HttpSession session, @RequestParam(required=false) Integer type)
     {
-    	
-        modelAndView.setViewName("index");
-        
-        List<String> productList=null;
-        modelAndView.addObject("productList", productList);
-        
+		//添加user参数
         Long id=(Long)session.getAttribute("userId");
         User user=null;
         if(id!=null)
@@ -48,8 +55,73 @@ public class MainController {
         }
         modelAndView.addObject("user", user);
         
+        //添加productViewList参数
+        List<ProductView> productViewList=new ArrayList<>();
         
-        modelAndView.addObject("listType", type==null?0:1);//0表示所有内容，1表示未购买的内容
+        if(user!=null)//已经登录的
+        {
+        	if(user.getUsertype()==0)//卖家
+        	{
+            	Seller seller=(Seller) user;
+        		if(!(type!=null && type==1))//展示所有卖家发布的产品，已出售的带有“已出售”标签
+        		{
+                	for(Product product:productRepository.findAll())
+                	{
+                		productViewList.add(new ProductView(product,null,!accountItemRepository.findByProduct(product).isEmpty()));
+                	}
+        		}
+        		else//展示卖家自己发布的产品，已出售的带有“已出售”标签
+        		{
+                	for(Product product:seller.getProducts())
+                	{
+                		productViewList.add(new ProductView(product,null,!accountItemRepository.findByProduct(product).isEmpty()));
+                	}
+        		}
+        	}
+        	else//买家
+        	{
+        		Buyer buyer=(Buyer) user;
+        		
+//        		//让前台处理“已购买”标签以及已购买物品的显示
+//            	for(Product product:productRepository.findAll())
+//            	{
+//            		productViewList.add(new ProductView(product,!accountItemRepository.findByProductAndBuyer(product, buyer).isEmpty(),null));
+//            	}
+        		
+        		if(!(type!=null && type==1))//展示所有产品信息，已购买项目带有“已购买”标签
+        		{
+                	for(Product product:productRepository.findAll())
+                	{
+                		productViewList.add(new ProductView(product,!accountItemRepository.findByProductAndBuyer(product, buyer).isEmpty(),null));
+                	}
+        		}
+        		else//展示买家还没有购买的内容页面
+        		{
+                	for(Product product:productRepository.findAll())
+                	{
+                		if(accountItemRepository.findByProductAndBuyer(product, buyer).isEmpty())
+                			productViewList.add(new ProductView(product,false,null));
+                	}
+        		}
+        	}
+        }
+        else//未登录
+        {
+        	//展示所有卖家发布的产品信息，没有带“已购买”、“已出售”标签
+        	for(Product product:productRepository.findAll())
+        	{
+        		productViewList.add(new ProductView(product,null,null));
+//        		productViewList.add(new ProductView(product,true,true));
+        	}
+        }
+        
+        modelAndView.addObject("productViewList", productViewList);
+        
+        //添加listType参数
+        modelAndView.addObject("listType", type==null?0:1);//0表示所有内容，1表示买家未购买的内容，或卖家自己发布的内容
+        
+        
+        modelAndView.setViewName("index");
         return modelAndView;
     }
 	
@@ -79,9 +151,34 @@ public class MainController {
     }
 	
 	@RequestMapping(value = "/publicSubmit")
-    public ModelAndView publicSubmit(ModelAndView modelAndView,Product product)
+    public ModelAndView publicSubmit(ModelAndView modelAndView,Product product, HttpSession session)
     {
+		Long id = (Long)session.getAttribute("userId");
+		Seller seller=sellerRepository.findById(id);
+		if(seller!=null)
+		{
+			product.setSeller(seller);
+			productRepository.save(product);
+		}
+		else
+		{
+			product=null;
+			modelAndView.addObject("product", product);
+			modelAndView.addObject("message", "请先登录");
+		}
+		
         modelAndView.setViewName("publicSubmit");
+        
+        return modelAndView;
+    }
+	
+	@RequestMapping(value = "/show")
+    public ModelAndView show(ModelAndView modelAndView, @RequestParam Long id)
+    {
+		Product product=productRepository.findById(id);
+		
+		modelAndView.addObject("product", product);
+        modelAndView.setViewName("show");
         
         return modelAndView;
     }

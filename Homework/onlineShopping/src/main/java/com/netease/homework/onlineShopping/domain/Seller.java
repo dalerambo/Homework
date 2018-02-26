@@ -10,7 +10,15 @@ import javax.persistence.OneToMany;
 @Entity
 public class Seller extends User{
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy="seller")    
+    public List<Product> getProducts() {
+		return products;
+	}
+
+	public void setProducts(List<Product> products) {
+		this.products = products;
+	}
+
+	@OneToMany(fetch = FetchType.LAZY,mappedBy="seller")    
     private List<Product> products;  
 	
 	@Override
