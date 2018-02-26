@@ -45,14 +45,8 @@ public class MainController {
     public ModelAndView index(ModelAndView modelAndView, HttpSession session, @RequestParam(required=false) Integer type)
     {
 		//添加user参数
-        Long id=(Long)session.getAttribute("userId");
-        User user=null;
-        if(id!=null)
-        {
-        	user=sellerRepository.findById(id);
-        	if(user==null)
-        		user=buyerRepository.findById(id);
-        }
+        Long userId=(Long)session.getAttribute("userId");
+        User user=getUser(userId);
         modelAndView.addObject("user", user);
         
         //添加productViewList参数
@@ -125,6 +119,40 @@ public class MainController {
         return modelAndView;
     }
 	
+	@RequestMapping(value = "/show")
+    public ModelAndView show(ModelAndView modelAndView, @RequestParam Long id, HttpSession session)
+    {
+		Long userId = (Long)session.getAttribute("userId");
+        User user=getUser(userId);
+        modelAndView.addObject("user", user);
+        
+		ProductView productView=new ProductView(productRepository.findById(id),null,null);
+		
+		if(user!=null)//已经登录的
+        {
+        	if(user.getUsertype()==0)//卖家
+        	{
+            	productView=new ProductView(productRepository.findById(id));
+        	}
+        	else//买家
+        	{
+        		Buyer buyer=(Buyer) user;
+        		Product product= productRepository.findById(id);
+        		productView=new ProductView(product,!accountItemRepository.findByProductAndBuyer(product, buyer).isEmpty(),null);
+        	}
+        }
+        else //未登录
+        {
+        	productView=new ProductView(productRepository.findById(id));
+        }
+		
+		
+		modelAndView.addObject("productView", productView);
+        modelAndView.setViewName("show");
+        
+        return modelAndView;
+    }
+	
 	@RequestMapping(value = "/login")
     public ModelAndView login(ModelAndView modelAndView)
     {
@@ -172,13 +200,32 @@ public class MainController {
         return modelAndView;
     }
 	
-	@RequestMapping(value = "/show")
-    public ModelAndView show(ModelAndView modelAndView, @RequestParam Long id)
+	@RequestMapping(value = "/edit")
+    public ModelAndView edit(ModelAndView modelAndView)
     {
-		Product product=productRepository.findById(id);
+        modelAndView.setViewName("edit");
+        
+        return modelAndView;
+    }
+
+	@RequestMapping(value = "/editSubmit")
+    public ModelAndView editSubmit(ModelAndView modelAndView,Product product, HttpSession session)
+    {
+		Long id = (Long)session.getAttribute("userId");
+		Seller seller=sellerRepository.findById(id);
+		if(seller!=null)
+		{
+			product.setSeller(seller);
+			productRepository.save(product);
+		}
+		else
+		{
+			product=null;
+			modelAndView.addObject("product", product);
+			modelAndView.addObject("message", "请先登录");
+		}
 		
-		modelAndView.addObject("product", product);
-        modelAndView.setViewName("show");
+        modelAndView.setViewName("editSubmit");
         
         return modelAndView;
     }
@@ -213,4 +260,16 @@ public class MainController {
         modelAndView.addObject("userList", userList);
         return modelAndView;
     }
+	
+	private User getUser(Long userId)
+	{
+		User user=null;
+        if(userId!=null)
+        {
+        	user=sellerRepository.findById(userId);
+        	if(user==null)
+        		user=buyerRepository.findById(userId);
+        }
+        return user;
+	}
 }

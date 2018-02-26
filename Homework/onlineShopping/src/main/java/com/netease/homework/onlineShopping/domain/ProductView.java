@@ -11,11 +11,27 @@ public class ProductView {
     //是否已经出售了
     private Boolean isSell;
     
+    //购买时的价格
+    private Double buyPrice;
+    
+    public ProductView(Product product)
+    {
+    	this.product=product;
+    }
+    
     public ProductView(Product product,Boolean isBuy,Boolean isSell)
     {
     	this.product=product;
     	this.isBuy=isBuy;
     	this.isSell=isSell;
+    }
+    
+    public ProductView(Product product,Boolean isBuy,Boolean isSell, Double buyPrice)
+    {
+    	this.product=product;
+    	this.isBuy=isBuy;
+    	this.isSell=isSell;
+    	this.setBuyPrice(buyPrice);
     }
 
 	public Product getProduct() {
@@ -40,5 +56,13 @@ public class ProductView {
 
 	public void setIsSell(Boolean isSell) {
 		this.isSell = isSell;
+	}
+
+	public Double getBuyPrice() {
+		return buyPrice;
+	}
+
+	public void setBuyPrice(Double buyPrice) {
+		this.buyPrice = buyPrice;
 	}
 }
