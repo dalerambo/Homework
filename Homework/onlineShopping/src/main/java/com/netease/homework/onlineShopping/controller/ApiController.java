@@ -15,22 +15,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.netease.homework.onlineShopping.domain.Product;
 import com.netease.homework.onlineShopping.domain.User;
+import com.netease.homework.onlineShopping.repository.BuyerRepository;
+import com.netease.homework.onlineShopping.repository.ProductRepository;
+import com.netease.homework.onlineShopping.repository.SellerRepository;
 import com.netease.homework.onlineShopping.service.ApiService;
 
 @Controller
 @RequestMapping("/api")
 public class ApiController {
-
+    
 	@Autowired
 	private ApiService apiService;
+	
+	@Autowired
+	private ProductRepository productRepository;
 	
 	@RequestMapping(value = "/login")
 	@ResponseBody
     public Object login(ModelAndView modelAndView, HttpSession session, @RequestParam String userName, @RequestParam String password)
     {
 		Map<String,Object> result=new HashMap<>();
-		User user=apiService.findUser(userName, password);
+		User user=apiService.getUser(userName, password);
 		
 		if(user!=null)
 		{
@@ -44,6 +51,71 @@ public class ApiController {
 
 		result.put("code", 200);
         return result;
+    }
+	
+	@RequestMapping(value = "/delete")
+	@ResponseBody
+	public Object delete(ModelAndView modelAndView, HttpSession session, @RequestParam Long id)
+    {
+		Map<String,Object> result=new HashMap<>();
+		
+		Long userId=(Long)session.getAttribute("userId");
+		if(userId==null)
+		{
+			result.put("message", "请登录！");
+        	result.put("code", 417);
+		}
+		else
+		{
+	        User user=apiService.getUser(userId);
+	        
+	        if(user ==null || user.getUsertype()!=0)
+	        {
+	        	result.put("message", "非卖家用户无权限删除商品！");
+	        	result.put("code", 417);
+	        }
+	        else
+	        {
+	        	Product product=productRepository.findById(id);
+	        	if(product==null)
+	        	{
+	        		result.put("message", "商品不存在！");
+	            	result.put("code", 417);
+	        	}
+	        	else if(apiService.isSell(product))
+	        	{
+	        		result.put("message", "已出售的商品不能删除！");
+	            	result.put("code", 417);
+	        	}
+	        	else
+	        	{
+//	        		result.put("message", "测试！");
+//	            	result.put("code", 417);
+	            	
+	        		try
+	        		{
+	        			productRepository.delete(id);
+		        		result.put("result", true);
+		            	result.put("code", 200);
+	        		}
+	        		catch(Exception e)
+	        		{
+	        			result.put("message", e.getMessage());
+		            	result.put("code", 417);
+	        		}
+	        	}
+	        }
+		}
+		
+        return result;
+    }
+	
+	
+	@RequestMapping(value = "/buy")
+	@ResponseBody
+	public Object buy(ModelAndView modelAndView, HttpSession session, @RequestParam Long id)
+    {
+		
     }
 
 }

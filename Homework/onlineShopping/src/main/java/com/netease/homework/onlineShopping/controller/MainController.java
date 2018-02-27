@@ -24,6 +24,7 @@ import com.netease.homework.onlineShopping.repository.BuyerRepository;
 import com.netease.homework.onlineShopping.repository.AccountItemRepository;
 import com.netease.homework.onlineShopping.repository.ProductRepository;
 import com.netease.homework.onlineShopping.repository.SellerRepository;
+import com.netease.homework.onlineShopping.service.ApiService;
 
 @Controller
 @RequestMapping("/")
@@ -39,14 +40,14 @@ public class MainController {
 	private ProductRepository productRepository;
     
     @Autowired
-	private AccountItemRepository accountItemRepository;
+    private ApiService apiService;
     
 	@RequestMapping(value = "/")
     public ModelAndView index(ModelAndView modelAndView, HttpSession session, @RequestParam(required=false) Integer type)
     {
 		//添加user参数
         Long userId=(Long)session.getAttribute("userId");
-        User user=getUser(userId);
+        User user=apiService.getUser(userId);
         modelAndView.addObject("user", user);
         
         //添加productViewList参数
@@ -61,14 +62,14 @@ public class MainController {
         		{
                 	for(Product product:productRepository.findAll())
                 	{
-                		productViewList.add(new ProductView(product,null,!accountItemRepository.findByProduct(product).isEmpty()));
+                		productViewList.add(new ProductView(product,null,apiService.isSell(product)));
                 	}
         		}
         		else//展示卖家自己发布的产品，已出售的带有“已出售”标签
         		{
                 	for(Product product:seller.getProducts())
                 	{
-                		productViewList.add(new ProductView(product,null,!accountItemRepository.findByProduct(product).isEmpty()));
+                		productViewList.add(new ProductView(product,null,apiService.isSell(product)));
                 	}
         		}
         	}
@@ -79,21 +80,21 @@ public class MainController {
 //        		//让前台处理“已购买”标签以及已购买物品的显示
 //            	for(Product product:productRepository.findAll())
 //            	{
-//            		productViewList.add(new ProductView(product,!accountItemRepository.findByProductAndBuyer(product, buyer).isEmpty(),null));
+//            		productViewList.add(new ProductView(product,apiService.isBuy(buyer, product),null));
 //            	}
         		
         		if(!(type!=null && type==1))//展示所有产品信息，已购买项目带有“已购买”标签
         		{
                 	for(Product product:productRepository.findAll())
                 	{
-                		productViewList.add(new ProductView(product,!accountItemRepository.findByProductAndBuyer(product, buyer).isEmpty(),null));
+                		productViewList.add(new ProductView(product,apiService.isBuy(buyer, product),null));
                 	}
         		}
         		else//展示买家还没有购买的内容页面
         		{
                 	for(Product product:productRepository.findAll())
                 	{
-                		if(accountItemRepository.findByProductAndBuyer(product, buyer).isEmpty())
+                		if(!apiService.isBuy(buyer, product))
                 			productViewList.add(new ProductView(product,false,null));
                 	}
         		}
@@ -123,7 +124,7 @@ public class MainController {
     public ModelAndView show(ModelAndView modelAndView, @RequestParam Long id, HttpSession session)
     {
 		Long userId = (Long)session.getAttribute("userId");
-        User user=getUser(userId);
+        User user=apiService.getUser(userId);
         modelAndView.addObject("user", user);
         
 		ProductView productView=new ProductView(productRepository.findById(id),null,null);
@@ -138,7 +139,7 @@ public class MainController {
         	{
         		Buyer buyer=(Buyer) user;
         		Product product= productRepository.findById(id);
-        		productView=new ProductView(product,!accountItemRepository.findByProductAndBuyer(product, buyer).isEmpty(),null);
+        		productView=new ProductView(product,apiService.isBuy(buyer, product),null);
         	}
         }
         else //未登录
@@ -171,8 +172,13 @@ public class MainController {
     }
 	
 	@RequestMapping(value = "/public")
-    public ModelAndView publicItem(ModelAndView modelAndView)
+    public ModelAndView publicItem(ModelAndView modelAndView, HttpSession session)
     {
+		Long userId = (Long)session.getAttribute("userId");
+        User user=apiService.getUser(userId);
+        modelAndView.addObject("user", user);
+        
+        
         modelAndView.setViewName("public");
         
         return modelAndView;
@@ -201,21 +207,29 @@ public class MainController {
     }
 	
 	@RequestMapping(value = "/edit")
-    public ModelAndView edit(ModelAndView modelAndView)
+    public ModelAndView edit(ModelAndView modelAndView, @RequestParam Long id, HttpSession session)
     {
+		Long userId = (Long)session.getAttribute("userId");
+        User user=apiService.getUser(userId);
+        modelAndView.addObject("user", user);
+        
+		Product product=productRepository.findById(id);
+		modelAndView.addObject("product", product);
+		
         modelAndView.setViewName("edit");
         
         return modelAndView;
     }
 
 	@RequestMapping(value = "/editSubmit")
-    public ModelAndView editSubmit(ModelAndView modelAndView,Product product, HttpSession session)
+    public ModelAndView editSubmit(ModelAndView modelAndView, @RequestParam Long id, Product product, HttpSession session)
     {
-		Long id = (Long)session.getAttribute("userId");
-		Seller seller=sellerRepository.findById(id);
+		Long userId = (Long)session.getAttribute("userId");
+		Seller seller=sellerRepository.findById(userId);
 		if(seller!=null)
 		{
 			product.setSeller(seller);
+			product.setId(id);
 			productRepository.save(product);
 		}
 		else
@@ -261,15 +275,5 @@ public class MainController {
         return modelAndView;
     }
 	
-	private User getUser(Long userId)
-	{
-		User user=null;
-        if(userId!=null)
-        {
-        	user=sellerRepository.findById(userId);
-        	if(user==null)
-        		user=buyerRepository.findById(userId);
-        }
-        return user;
-	}
+
 }
