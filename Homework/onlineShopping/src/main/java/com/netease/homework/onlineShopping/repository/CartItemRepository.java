@@ -10,6 +10,5 @@ import com.netease.homework.onlineShopping.domain.Product;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 	CartItem findById(Long id);
-	List<CartItem> findByProduct(Product product);
-	List<CartItem> findByProductAndCarter(Product product,Buyer buyer);
+	CartItem findByProductAndCarter(Product product,Buyer carter);
 }

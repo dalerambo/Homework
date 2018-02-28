@@ -165,7 +165,16 @@ public class ApiController {
 	        	{
 	        		try
 	        		{
-	        			cartItemRepository.save(new CartItem(buyer,product,num));
+	        			CartItem  cartItem= cartItemRepository.findByProductAndCarter(product, buyer);
+	        			if(cartItem==null)
+	        			{
+	        				cartItem=new CartItem(buyer,product,num);
+	        			}
+	        			else
+	        			{
+	        				cartItem.setNumber(cartItem.getNumber()+num);
+	        			}
+	        			cartItemRepository.save(cartItem);
 		        		result.put("result", true);
 		            	result.put("code", 200);
 	        		}
