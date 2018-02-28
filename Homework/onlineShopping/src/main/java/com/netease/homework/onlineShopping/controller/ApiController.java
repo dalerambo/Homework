@@ -15,9 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.netease.homework.onlineShopping.domain.Buyer;
+import com.netease.homework.onlineShopping.domain.CartItem;
 import com.netease.homework.onlineShopping.domain.Product;
 import com.netease.homework.onlineShopping.domain.User;
 import com.netease.homework.onlineShopping.repository.BuyerRepository;
+import com.netease.homework.onlineShopping.repository.CartItemRepository;
 import com.netease.homework.onlineShopping.repository.ProductRepository;
 import com.netease.homework.onlineShopping.repository.SellerRepository;
 import com.netease.homework.onlineShopping.service.ApiService;
@@ -29,8 +32,14 @@ public class ApiController {
 	@Autowired
 	private ApiService apiService;
 	
+    @Autowired
+	private BuyerRepository buyerRepository;
+	
 	@Autowired
 	private ProductRepository productRepository;
+	
+	@Autowired
+	private CartItemRepository cartItemRepository;
 	
 	@RequestMapping(value = "/login")
 	@ResponseBody
@@ -111,11 +120,66 @@ public class ApiController {
     }
 	
 	
-	@RequestMapping(value = "/buy")
+	@RequestMapping(value = "/add")
 	@ResponseBody
-	public Object buy(ModelAndView modelAndView, HttpSession session, @RequestParam Long id)
+	public Object buy(ModelAndView modelAndView, HttpSession session, @RequestParam Long id, @RequestParam Integer num)
     {
+		Map<String,Object> result=new HashMap<>();
 		
+		
+		Long userId=(Long)session.getAttribute("userId");
+		if(userId==null)
+		{
+			result.put("message", "请登录！");
+        	result.put("code", 417);
+		}
+		else
+		{
+	        User user=apiService.getUser(userId);
+	        
+	        if(user ==null || user.getUsertype()!=1)
+	        {
+	        	result.put("message", "非买家用户无法购买！");
+	        	result.put("code", 417);
+	        }
+	        else
+	        {
+	        	Buyer buyer=(Buyer) user;
+	        	Product product=productRepository.findById(id);
+	        	if(product==null)
+	        	{
+	        		result.put("message", "商品不存在！");
+	            	result.put("code", 417);
+	        	}
+	        	else if(apiService.isBuy(buyer, product))
+	        	{
+	        		result.put("message", "已出售的商品不能重复购买！");
+	            	result.put("code", 417);
+	        	}
+	        	else if(num<=0)
+	        	{
+	        		result.put("message", "购买数量必须大于0！");
+	            	result.put("code", 417);
+	        	}
+	        	else
+	        	{
+	        		try
+	        		{
+	        			cartItemRepository.save(new CartItem(buyer,product,num));
+		        		result.put("result", true);
+		            	result.put("code", 200);
+	        		}
+	        		catch(Exception e)
+	        		{
+	        			result.put("message", e.getMessage());
+		            	result.put("code", 417);
+	        		}
+	        	}
+	        }
+		}
+    	
+    	return result;
+    	
     }
 
 }

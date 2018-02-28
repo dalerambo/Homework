@@ -30,8 +30,11 @@ public abstract class Item {
 	//商品项目购买数量
     private Integer number;
     
-    //商品项目购买时的价格
-    private Double price;
+
+    public Item()
+    {
+    	time=new Date();
+    }
 
     public Product getProduct() {
 		return product;
@@ -57,13 +60,7 @@ public abstract class Item {
 		this.number = number;
 	}
 
-	public Double getPrice() {
-		return price;
-	}
 
-	public void setPrice(Double price) {
-		this.price = price;
-	}
 
 	public Long getId() {
 		return id;

@@ -11,6 +11,19 @@ public class CartItem extends Item{
     @ManyToOne(fetch = FetchType.LAZY)
     private Buyer carter;
     
+    
+    public CartItem()
+    {
+    	
+    }
+    
+    public CartItem(Buyer carter,Product product, Integer number)
+    {
+    	this.setCarter(carter);
+    	this.setProduct(product);
+    	this.setNumber(number);
+    }
+    
 	public Buyer getCarter() {
 		return carter;
 	}

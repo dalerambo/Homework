@@ -18,7 +18,7 @@ del,ins,u,s,a,a:hover{text-decoration:none;}
 html{-webkit-tap-highlight-color:rgba(0,0,0,0);}
 button,input[type="button"],input[type="submit"],input[type="reset"]{-webkit-appearance:none;}
 ::-webkit-input-placeholder{color:#b3b3b3 !important;font-weight:normal !important;}
-body,textarea,input,button,select,keygen,legend{font:14px/1.5 "Microsoft YaHei","å¾®è½¯é›…é»‘","å®‹ä½“";color:#333;outline:0;}
+body,textarea,input,button,select,keygen,legend{font:14px/1.5 "Microsoft YaHei","Î¢ÈíÑÅºÚ","ËÎÌå";color:#333;outline:0;}
 body{background:#f3f3f3;}
 a{color:#333;}
 a:hover{color:#000;}
@@ -26,7 +26,11 @@ a:hover{color:#000;}
 
 body{padding-bottom:50px;}
 .g-doc{width:970px;margin: 0 auto;}
-
+.g-doc th.td{text-align:center};
+#newTable th,td{text-align:center;}
+#thisId{display:none;}
+#act-btn{margin-top:100px;margin-left:300px;}
+#act-btn button{margin-left:100px;}
 .u-btn{display:inline-block;position:relative;box-sizing:border-box;padding:0 10px;height:32px;line-height:30px;border:1px solid #d9d9d9;border-radius:4px;font-size:14px;text-align:center;vertical-align:middle;cursor:pointer;word-wrap:normal;white-space:nowrap;}
 .u-btn >.file{position:absolute;right:-1px;top:-1px;width:100%;height:100%;padding:1px;overflow:hidden;opacity:0;}
 .u-btn >.file >input{position:absolute;right:0;top:0;width:1000%;height:100%;cursor:pointer;}
@@ -54,6 +58,7 @@ body{padding-bottom:50px;}
 .u-btn-fw{min-width:6em;}
 
 .u-ipt{display:inline-block;box-sizing:border-box;width:100%;padding:6px 10px;height:32px;line-height:18px;border-radius:4px;vertical-align:middle;border:1px solid #d9d9d9;font-size:14px;background-color:#fff;}
+.u-ipt[type=file]{width:auto;border-color:transparent;background:none;}
 .u-ipt:focus{box-shadow:inset 0 1px 4px rgba(0,0,0,0.1);}
 .u-ipt.z-err{border-color:#ff8a77;animation:shake 0.5s;}
 .u-ipt.z-dis{opacity:0.5;cursor:default;box-shadow:none;}
@@ -193,6 +198,9 @@ select.u-ipt{width:auto;padding:0;line-height:1;}
 .n-show .cnt h2{margin:0 0 10px;font-size:20px;}
 .n-show .cnt .summary{margin:0 0 10px;}
 .n-show .cnt .price{margin:0 0 10px;}
+.n-show .cnt .num{margin:0 0 10px;}
+.lessNum , .moreNum{font-size:18px;font-weight:bold;margin-left:10px;}
+.totalNum{font-size:16px;margin-left:10px;}
 .n-show .cnt .oprt{margin:10px 0 0;}
 .n-show .cnt .u-btn{min-width:8em;float:left;margin-right:10px;}
 .n-show .cnt .buyprice{float:left;line-height: 32px;color:#999;}
@@ -204,7 +212,7 @@ select.u-ipt{width:auto;padding:0;line-height:1;}
 .n-table .total{text-align: right;}
 
 .n-public{position:relative;}
-.n-public .ipt{width:720px;}
+.n-public .ipt:not([type=file]){width:720px;}
 .n-public .price{width:140px;margin-right:5px;}
 .n-public .imgpre{position: absolute;top:0;right:0;border:1px solid #d9d9d9;border-radius:4px;padding:2px;background: #fff;}
 .n-public .imgpre img{display:block;width:130px;height:130px;border-radius:2px;transition:width 0.2s,height 0.2s;}

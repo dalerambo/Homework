@@ -11,12 +11,23 @@ public class AccountItem extends Item{
     @ManyToOne(fetch = FetchType.LAZY)
     private Buyer buyer;
     
+    //商品项目购买时的价格
+    private Double price;
+    
 	public Buyer getBuyer() {
 		return buyer;
 	}
 
 	public void setBuyer(Buyer buyer) {
 		this.buyer = buyer;
+	}
+	
+	public Double getPrice() {
+		return price;
+	}
+
+	public void setPrice(Double price) {
+		this.price = price;
 	}
 
 	@Override
