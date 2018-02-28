@@ -12,7 +12,7 @@ public class AccountItem extends Item{
     private Buyer buyer;
     
     //商品项目购买时的价格
-    private Double price;
+    private Double buyPrice;
     
 	public Buyer getBuyer() {
 		return buyer;
@@ -21,18 +21,18 @@ public class AccountItem extends Item{
 	public void setBuyer(Buyer buyer) {
 		this.buyer = buyer;
 	}
-	
-	public Double getPrice() {
-		return price;
-	}
-
-	public void setPrice(Double price) {
-		this.price = price;
-	}
 
 	@Override
 	public int getItemtype()
 	{
 		return 1;
+	}
+
+	public Double getBuyPrice() {
+		return buyPrice;
+	}
+
+	public void setBuyPrice(Double buyPrice) {
+		this.buyPrice = buyPrice;
 	}
 }

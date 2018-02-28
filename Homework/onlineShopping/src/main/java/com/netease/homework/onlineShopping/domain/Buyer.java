@@ -34,6 +34,7 @@ public class Buyer extends User{
 		this.account = account;
 	}
 
+	
 	@Override
 	public int getUsertype() {
 		return 1;

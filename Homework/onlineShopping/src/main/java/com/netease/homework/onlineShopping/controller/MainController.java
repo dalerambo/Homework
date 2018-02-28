@@ -245,16 +245,36 @@ public class MainController {
     }
 	
 	@RequestMapping(value = "/account")
-    public ModelAndView account(ModelAndView modelAndView)
+    public ModelAndView account(ModelAndView modelAndView, HttpSession session)
     {
+		Long userId = (Long)session.getAttribute("userId");
+        User user=apiService.getUser(userId);
+        modelAndView.addObject("user", user);
+        
+        if(user !=null && user.getUsertype()==1)
+        {
+        	Buyer buyer = (Buyer) user;
+        	modelAndView.addObject("itemList", buyer.getAccount());
+        }
+        
         modelAndView.setViewName("account");
         
         return modelAndView;
     }
 	
 	@RequestMapping(value = "/cart")
-    public ModelAndView cart(ModelAndView modelAndView)
+    public ModelAndView cart(ModelAndView modelAndView, HttpSession session)
     {
+		Long userId = (Long)session.getAttribute("userId");
+        User user=apiService.getUser(userId);
+        modelAndView.addObject("user", user);
+        
+        if(user !=null && user.getUsertype()==1)
+        {
+        	Buyer buyer = (Buyer) user;
+        	modelAndView.addObject("itemList", buyer.getCart());
+        }
+        
         modelAndView.setViewName("cart");
         
         return modelAndView;

@@ -190,5 +190,47 @@ public class ApiController {
     	return result;
     	
     }
+	
+	@RequestMapping(value = "/buy")
+	@ResponseBody
+	public Object buy(ModelAndView modelAndView, HttpSession session)
+    {
+		Map<String,Object> result=new HashMap<>();
+		
+		
+		Long userId=(Long)session.getAttribute("userId");
+		if(userId==null)
+		{
+			result.put("message", "请登录！");
+        	result.put("code", 417);
+		}
+		else
+		{
+	        User user=apiService.getUser(userId);
+	        
+	        if(user ==null || user.getUsertype()!=1)
+	        {
+	        	result.put("message", "非买家用户无法购买！");
+	        	result.put("code", 417);
+	        }
+	        else
+	        {
+	        	Buyer buyer=(Buyer) user;
+        		try
+        		{
+	        		result.put("result", true);
+	            	result.put("code", 200);
+        		}
+        		catch(Exception e)
+        		{
+        			result.put("message", e.getMessage());
+	            	result.put("code", 417);
+        		}
+	        }
+		}
+    	
+    	return result;
+    	
+    }
 
 }
