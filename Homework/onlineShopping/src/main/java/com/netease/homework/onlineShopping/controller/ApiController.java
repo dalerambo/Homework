@@ -10,15 +10,18 @@ import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.netease.homework.onlineShopping.domain.AccountItem;
 import com.netease.homework.onlineShopping.domain.Buyer;
 import com.netease.homework.onlineShopping.domain.CartItem;
 import com.netease.homework.onlineShopping.domain.Product;
 import com.netease.homework.onlineShopping.domain.User;
+import com.netease.homework.onlineShopping.repository.AccountItemRepository;
 import com.netease.homework.onlineShopping.repository.BuyerRepository;
 import com.netease.homework.onlineShopping.repository.CartItemRepository;
 import com.netease.homework.onlineShopping.repository.ProductRepository;
@@ -40,6 +43,9 @@ public class ApiController {
 	
 	@Autowired
 	private CartItemRepository cartItemRepository;
+	
+	@Autowired
+	private AccountItemRepository accountItemRepository;
 	
 	@RequestMapping(value = "/login")
 	@ResponseBody
@@ -193,7 +199,7 @@ public class ApiController {
 	
 	@RequestMapping(value = "/buy")
 	@ResponseBody
-	public Object buy(ModelAndView modelAndView, HttpSession session)
+	public Object buy(ModelAndView modelAndView, HttpSession session, @RequestBody List<Map<String,String>> data)
     {
 		Map<String,Object> result=new HashMap<>();
 		
@@ -218,6 +224,26 @@ public class ApiController {
 	        	Buyer buyer=(Buyer) user;
         		try
         		{
+        			//这里要采用数据库事务！！！！！！
+        			for(Map<String,String> item:data)
+        			{
+        				Long id=Long.valueOf(item.get("id"));
+        				Integer num=Integer.valueOf(item.get("num"));
+        				CartItem cartItem = cartItemRepository.findById(id);
+        				if(cartItem.getCarter().getId()!=userId)//如果item不是该买家的，则返回异常
+        				{
+        	            	throw new Exception("请求参数有误");
+        				}
+        				AccountItem accountItem=new AccountItem();
+        				accountItem.setBuyer(buyer);
+        				accountItem.setBuyPrice(cartItem.getProduct().getPrice());
+        				accountItem.setNumber(num);
+        				accountItem.setProduct(cartItem.getProduct());
+        				accountItemRepository.save(accountItem);
+        				cartItemRepository.delete(cartItem);
+        			}
+        			
+        			
 	        		result.put("result", true);
 	            	result.put("code", 200);
         		}

@@ -25,7 +25,7 @@
             <tr>
                 <td><a href="/show?id=${x.product.id}"><img src="${x.product.image}" alt=""></a></td>
                 <td><h4><a href="/show?id=${x.product.id}">${x.product.title}</a></h4></td>
-                <td><span class="v-time">${x.product.time?string("yyyy-MM-dd HH:mm")}</span></td>
+                <td><span class="v-time">${x.time?string("yyyy-MM-dd HH:mm")}</span></td>
                 <td><span class="v-unit">¥</span><span class="value">${x.buyPrice}</span></td>
             </tr>
             </#list>

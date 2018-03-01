@@ -40,6 +40,9 @@ public class MainController {
 	private ProductRepository productRepository;
     
     @Autowired
+	private AccountItemRepository accountItemRepository;
+    
+    @Autowired
     private ApiService apiService;
     
 	@RequestMapping(value = "/")
@@ -87,7 +90,8 @@ public class MainController {
         		{
                 	for(Product product:productRepository.findAll())
                 	{
-                		productViewList.add(new ProductView(product,apiService.isBuy(buyer, product),null));
+                		ProductView productView=new ProductView(product,apiService.isBuy(buyer, product),null);
+                		productViewList.add(productView);
                 	}
         		}
         		else//展示买家还没有购买的内容页面
@@ -139,7 +143,17 @@ public class MainController {
         	{
         		Buyer buyer=(Buyer) user;
         		Product product= productRepository.findById(id);
-        		productView=new ProductView(product,apiService.isBuy(buyer, product),null);
+        		
+        		if(apiService.isBuy(buyer, product))
+        		{
+        			productView=new ProductView(product,true,null);
+        			productView.setBuyPrice(accountItemRepository.findByProductAndBuyer(product, buyer).getBuyPrice());
+        		}
+        		else
+        		{
+        			productView=new ProductView(product,false,null);
+        		}
+
         	}
         }
         else //未登录
@@ -189,6 +203,7 @@ public class MainController {
     {
 		Long id = (Long)session.getAttribute("userId");
 		Seller seller=sellerRepository.findById(id);
+		modelAndView.addObject("user", seller);
 		if(seller!=null)
 		{
 			product.setSeller(seller);
@@ -226,6 +241,7 @@ public class MainController {
     {
 		Long userId = (Long)session.getAttribute("userId");
 		Seller seller=sellerRepository.findById(userId);
+		modelAndView.addObject("user", seller);
 		if(seller!=null)
 		{
 			product.setSeller(seller);

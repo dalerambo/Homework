@@ -11,5 +11,5 @@ import com.netease.homework.onlineShopping.domain.Product;
 public interface AccountItemRepository extends JpaRepository<AccountItem, Long> {
 	AccountItem findById(Long id);
 	List<AccountItem> findByProduct(Product product);
-	List<AccountItem> findByProductAndBuyer(Product product,Buyer buyer);
+	AccountItem findByProductAndBuyer(Product product,Buyer buyer);
 }

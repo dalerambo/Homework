@@ -55,6 +55,15 @@ public class Initialization implements ApplicationListener<ContextRefreshedEvent
 				product.setImage("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1519626552671&di=1757241c633408b937f12340e23b4c73&imgtype=0&src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01e8a157f86d8ca84a0d304fcb9943.jpg%402o.jpg");
 				product.setSeller(sellerRepository.findById((long) 1));
 				productRepository.saveAndFlush(product);
+				
+				product=new Product();
+				product.setTitle("22");
+				product.setSummary("22");
+				product.setPrice(2.0);
+				product.setDetail("22");
+				product.setImage("https://ss0.bdstatic.com/6ONWsjip0QIZ8tyhnq/it/u=3618554304,2887917621&fm=77&w_h=121_75&cs=2820658166,1330608299");
+				product.setSeller(sellerRepository.findById((long) 1));
+				productRepository.saveAndFlush(product);
 			}
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();

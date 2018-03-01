@@ -14,7 +14,7 @@
         <h3>暂无内容！</h3>
     </div>
     <#else>
-    <table class="m-table m-table-row n-table g-b3">
+    <table class="m-table m-table-row n-table g-b3" id="itemListTable">
         <colgroup><col class="img"/><col/><col class="time"/><col class="price"/></colgroup>
         <thead>
             <tr><th>内容图片</th><th>内容名称</th><th>数量</th><th>添加时间</th><th>价格</th></tr>
@@ -22,7 +22,7 @@
         <tbody>
             <#list itemList as x>
             <#assign total = total + x.product.price * x.number>
-            <tr>
+            <tr data-id="${x.product.id}">
                 <td><a href="/show?id=${x.product.id}"><img src="${x.product.image}" alt=""></a></td>
                 <td><h4><a href="/show?id=${x.product.id}">${x.product.title}</a></h4></td>
                 <td><span class="v-num">${x.number}</span></td>

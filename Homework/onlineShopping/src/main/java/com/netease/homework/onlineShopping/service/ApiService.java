@@ -48,7 +48,9 @@ public class ApiService {
     //货物是否已经被指定买家购买
     public boolean isBuy(Buyer buyer,Product product)
     {
-    	return !accountItemRepository.findByProductAndBuyer(product, buyer).isEmpty();
+//    	return !accountItemRepository.findByProductAndBuyer(product, buyer).isEmpty();
+    	
+    	return accountItemRepository.findByProductAndBuyer(product, buyer)!=null;
     }
     
     //货物是否已经被卖出
