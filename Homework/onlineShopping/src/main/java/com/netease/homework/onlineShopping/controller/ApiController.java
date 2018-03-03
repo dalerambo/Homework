@@ -1,5 +1,8 @@
 package com.netease.homework.onlineShopping.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,14 +11,18 @@ import java.util.Map;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.netease.homework.onlineShopping.configuration.ServiceInfoUtil;
 import com.netease.homework.onlineShopping.domain.AccountItem;
 import com.netease.homework.onlineShopping.domain.Buyer;
 import com.netease.homework.onlineShopping.domain.CartItem;
@@ -46,6 +53,12 @@ public class ApiController {
 	
 	@Autowired
 	private AccountItemRepository accountItemRepository;
+	
+	@Autowired
+	private ServiceInfoUtil serviceInfoUtil;
+	
+	@Value("${uploadImagePath}")
+    private String uploadImagePath;
 	
 	@RequestMapping(value = "/login")
 	@ResponseBody
@@ -258,6 +271,49 @@ public class ApiController {
     	
     	return result;
     	
+    }
+	
+	@RequestMapping(value = "/upload")
+	@ResponseBody
+	public Object upload(ModelAndView modelAndView, HttpSession session, @RequestParam(value="file")MultipartFile file)
+    {
+		Map<String,Object> result=new HashMap<>();
+		
+		Long userId=(Long)session.getAttribute("userId");
+		if(userId==null)
+		{
+			result.put("message", "请登录！");
+        	result.put("code", 417);
+		}
+		else
+		{
+ 
+			try {
+//				String filePath = URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(),"UTF-8").substring(1) + "static/js/" + file.getOriginalFilename();  
+				String filePath = uploadImagePath+ "/" + file.getOriginalFilename();  
+				
+				
+				File desFile = new File(filePath);
+				
+				if(!desFile.getParentFile().exists())
+				{
+					desFile.getParentFile().mkdirs();
+				}
+				
+				file.transferTo(desFile); 
+				
+	    		result.put("result", "http://localhost:"+ServiceInfoUtil.getPort()+"/"+file.getOriginalFilename());
+	        	result.put("code", 200);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				result.put("message", e.getMessage());
+	        	result.put("code", 417);
+			}
+	
+		}
+		
+		return result;
     }
 
 }
