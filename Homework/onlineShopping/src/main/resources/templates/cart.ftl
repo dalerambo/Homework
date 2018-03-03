@@ -22,7 +22,7 @@
         <tbody>
             <#list itemList as x>
             <#assign total = total + x.product.price * x.number>
-            <tr data-id="${x.product.id}">
+            <tr data-id="${x.id}">
                 <td><a href="/show?id=${x.product.id}"><img src="${x.product.image}" alt=""></a></td>
                 <td><h4><a href="/show?id=${x.product.id}">${x.product.title}</a></h4></td>
                 <td><span class="v-num">${x.number}</span></td>

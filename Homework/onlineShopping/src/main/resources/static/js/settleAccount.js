@@ -59,8 +59,8 @@
 		return;
 	};
 	$('back').onclick = function() {
-
-		location.href = window.history.go(-1);
+		window.history.go(-1); //刷新上一页
+//		location.href = window.history.go(-1);
 		// location.href = window.history.back();
 	}
 })(window, document);

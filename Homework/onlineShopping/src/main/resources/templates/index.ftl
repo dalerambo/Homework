@@ -57,6 +57,7 @@
 	                        <div class="price"><span class="v-unit">¥</span><span class="v-value">${x.product.price}</span></div>
 	                        <#if user?? && user.usertype==1 && x.isBuy?? && x.isBuy><span class="had"><b>已购买</b></span></#if>
 	                        <#if user?? && user.usertype==0 && x.isSell?? && x.isSell><span class="had"><b>已售出</b></span></#if>
+	                    	<#if user?? && user.usertype==0 && x.isSell?? && x.isSell && x.num??><span class="price"><b>已售出${x.num}个</b></span></#if>
 	                    </a>
 	                    <#if user?? && user.usertype==0 && x.isSell?? && !x.isSell><span class="u-btn u-btn-normal u-btn-xs del" data-del="${x.product.id}">删除</span></#if>
 	                </li>

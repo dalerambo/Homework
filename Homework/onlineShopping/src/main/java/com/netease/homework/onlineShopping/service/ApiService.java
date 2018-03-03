@@ -1,8 +1,11 @@
 package com.netease.homework.onlineShopping.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.netease.homework.onlineShopping.domain.AccountItem;
 import com.netease.homework.onlineShopping.domain.Buyer;
 import com.netease.homework.onlineShopping.domain.Product;
 import com.netease.homework.onlineShopping.domain.Seller;
@@ -59,6 +62,19 @@ public class ApiService {
     	return !accountItemRepository.findByProduct(product).isEmpty();
     }
     
-
-    
+    //获取已经出售的数量
+    public Integer getSellNumber(Product product)
+    {
+    	int num=0;
+    	List<AccountItem> items=accountItemRepository.findByProduct(product);
+    	if(items!=null)
+    	{
+    		for(AccountItem item:items)
+    		{
+    			num+=item.getNumber();
+    		}
+    	}
+    	
+    	return num;
+    }
 }

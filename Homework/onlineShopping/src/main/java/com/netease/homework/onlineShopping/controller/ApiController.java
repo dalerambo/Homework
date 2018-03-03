@@ -249,6 +249,7 @@ public class ApiController {
         		}
         		catch(Exception e)
         		{
+        			e.printStackTrace();
         			result.put("message", e.getMessage());
 	            	result.put("code", 417);
         		}
