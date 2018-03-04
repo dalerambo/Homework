@@ -210,6 +210,128 @@ public class ApiController {
     	
     }
 	
+	@RequestMapping(value = "/updateItem")
+	@ResponseBody
+	public Object updateItem(ModelAndView modelAndView, HttpSession session, @RequestParam Long id, @RequestParam Integer num)
+    {
+		Map<String,Object> result=new HashMap<>();
+		
+		
+		Long userId=(Long)session.getAttribute("userId");
+		if(userId==null)
+		{
+			result.put("message", "请登录！");
+        	result.put("code", 417);
+		}
+		else
+		{
+	        User user=apiService.getUser(userId);
+	        
+	        if(user ==null || user.getUsertype()!=1)
+	        {
+	        	result.put("message", "非买家用户无法购买！");
+	        	result.put("code", 417);
+	        }
+	        else
+	        {
+	        	if(num<=0)
+	        	{
+	        		result.put("message", "购买数量必须大于0！");
+	            	result.put("code", 417);
+	        	}
+	        	else
+	        	{
+	        		try
+	        		{
+	        			CartItem  cartItem= cartItemRepository.findById(id);
+	        			if(cartItem==null)
+	        			{
+	        				result.put("message", "购物车项目不存在！");
+	    	            	result.put("code", 417);
+	        			}
+	        			else if(cartItem.getCarter().getId()!=userId)
+	        			{
+	        				result.put("message", "购物车项目不属于该用户！");
+	    	            	result.put("code", 417);
+	        			}
+	        			else
+	        			{
+	        				cartItem.setNumber(num);
+	        			}
+	        			cartItemRepository.save(cartItem);
+		        		result.put("result", true);
+		            	result.put("code", 200);
+	        		}
+	        		catch(Exception e)
+	        		{
+	        			result.put("message", e.getMessage());
+		            	result.put("code", 417);
+	        		}
+	        	}
+	        }
+		}
+    	
+    	return result;
+    	
+    }
+	
+	@RequestMapping(value = "/deleteItem")
+	@ResponseBody
+	public Object deleteItem(ModelAndView modelAndView, HttpSession session, @RequestParam Long id)
+    {
+		Map<String,Object> result=new HashMap<>();
+		
+		
+		Long userId=(Long)session.getAttribute("userId");
+		if(userId==null)
+		{
+			result.put("message", "请登录！");
+        	result.put("code", 417);
+		}
+		else
+		{
+	        User user=apiService.getUser(userId);
+	        
+	        if(user ==null || user.getUsertype()!=1)
+	        {
+	        	result.put("message", "非买家用户无法操作！");
+	        	result.put("code", 417);
+	        }
+	        else
+	        {
+	        	try
+        		{
+        			CartItem  cartItem= cartItemRepository.findById(id);
+        			if(cartItem==null)
+        			{
+        				result.put("message", "购物车项目不存在！");
+    	            	result.put("code", 417);
+        			}
+        			else if(cartItem.getCarter().getId()!=userId)
+        			{
+        				result.put("message", "购物车项目不属于该用户！");
+    	            	result.put("code", 417);
+        			}
+        			else
+        			{
+        				cartItemRepository.delete(cartItem);
+        			}
+	        		result.put("result", true);
+	            	result.put("code", 200);
+        		}
+        		catch(Exception e)
+        		{
+        			result.put("message", e.getMessage());
+	            	result.put("code", 417);
+        		}
+	        }
+		}
+    	
+    	return result;
+    	
+    }
+	
+	
 	@RequestMapping(value = "/buy")
 	@ResponseBody
 	public Object buy(ModelAndView modelAndView, HttpSession session, @RequestBody List<Map<String,String>> data)

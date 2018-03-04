@@ -1,11 +1,44 @@
 (function(w, d, u) {
 
+	var loading = new Loading();
+	var layer = new Layer();
+	
 	var $ = function(id) {
 		return document.getElementById(id);
 	}
 
-	var loading = new Loading();
-	var layer = new Layer();
+	$('itemListTable').onclick = function(e){
+		var e = arguments[0] || window.event;
+		target = e.srcElement ? e.srcElement : e.target;
+		target=target.parentElement;
+		if(target.nodeName == "SPAN" && target.className == "moreNum"){
+			var num = target.parentElement.children[1].textContent;
+			var id = target.parentElement.parentElement.parentElement.dataset.id;
+			num ++;
+//			target.parentElement.children[1].textContent = num;
+			updateCartItem(id,num);
+		}else if(target.nodeName == "SPAN" && target.className == "lessNum"){
+			var num = target.parentElement.children[1].textContent;
+			var id = target.parentElement.parentElement.parentElement.dataset.id;
+			num --;
+			if(num <= 0){
+				layer.reset({
+					content : '是否删除？',
+					onconfirm : function() {
+						layer.hide();
+						loading.show();
+						
+						deleteCartItem(id);
+					}.bind(this)
+				}).show();
+			}else{
+				updateCartItem(id,num);
+			}
+		}
+		return false;
+	};
+	
+
 	$('Account').onclick = function(e) {
 		var itemListTable = document.getElementById("itemListTable");
 		var buyData = [];
@@ -63,4 +96,52 @@
 //		location.href = window.history.go(-1);
 		// location.href = window.history.back();
 	}
+	
+	var updateCartItem=function(id,num)
+	{
+		var data={id:id,num:num};
+//		console.log({id:id,num:num});
+		ajax({
+		data : data,
+		url : '/api/updateItem',
+		success : function(result) {
+			location.reload();
+		},
+		error : function(message) {
+			loading.result(message || '购物车更新失败');
+		}
+	});
+	}
+	
+	var deleteCartItem=function(id)
+	{
+		var data={id:id};
+//		console.log({id:id,num:num});
+		ajax({
+		data : data,
+		url : '/api/deleteItem',
+		success : function(result) {
+			location.reload();
+		},
+		error : function(message) {
+			loading.result(message || '购物车更新失败');
+		}});
+	}
+	
+	$('itemListTable').addEventListener('click',function(e){
+		var ele = e.target;
+		var delId = ele.dataset && ele.dataset.del;
+		if(delId){
+			layer.reset({
+				content : '是否删除？',
+				onconfirm : function() {
+					layer.hide();
+					loading.show();
+					
+					deleteCartItem(delId);
+				}.bind(this)
+			}).show();
+			return;
+		}
+	}.bind(this),false);
 })(window, document);
