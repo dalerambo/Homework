@@ -57,8 +57,8 @@ public class ApiController {
 	@Autowired
 	private ServiceInfoUtil serviceInfoUtil;
 	
-	@Value("${uploadImagePath}")
-    private String uploadImagePath;
+//	@Value("${uploadImagePath}")
+//    private String uploadImagePath;
 	
 	@RequestMapping(value = "/login")
 	@ResponseBody
@@ -289,12 +289,15 @@ public class ApiController {
 		{
  
 			try {
-//				String filePath = URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(),"UTF-8").substring(1) + "static/js/" + file.getOriginalFilename();  
-				String filePath = uploadImagePath+ "/" + file.getOriginalFilename();  
+				String staticResoucePath=URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(),"UTF-8").substring(1)+"static/";
+				String fileReletivePath= "images/"+userId+"/"+file.getOriginalFilename();
+				String fileAbsPath =staticResoucePath + fileReletivePath;  
+				
+//				String filePath = uploadImagePath+ "/" + file.getOriginalFilename();  
 				
 				
-				File desFile = new File(filePath);
-				
+				File desFile = new File(fileAbsPath);
+				//如果父目录不存在则创建
 				if(!desFile.getParentFile().exists())
 				{
 					desFile.getParentFile().mkdirs();
@@ -302,7 +305,7 @@ public class ApiController {
 				
 				file.transferTo(desFile); 
 				
-	    		result.put("result", "http://localhost:"+ServiceInfoUtil.getPort()+"/"+file.getOriginalFilename());
+	    		result.put("result", "http://localhost:"+ServiceInfoUtil.getPort()+"/"+fileReletivePath);
 	        	result.put("code", 200);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

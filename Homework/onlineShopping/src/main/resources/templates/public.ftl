@@ -23,7 +23,7 @@
                 </div>
             </div>
             <div class="fmitem">
-                            <label class="fmlab">图片：</label>
+                <label class="fmlab">图片：</label>
             	<div class="fmipt" id="uploadType">
 	                <input name="pic" type="radio" value="url" checked /> 图片地址
 					<input name="pic" type="radio" value="file" /> 本地上传
