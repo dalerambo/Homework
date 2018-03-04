@@ -306,20 +306,5 @@ public class MainController {
         return modelAndView;
     }
 	
-	@RequestMapping(value = "/test")
-    public ModelAndView test(ModelAndView modelAndView)
-    {
-    	
-        modelAndView.setViewName("test");
-        
-        List<String> userList=new ArrayList<String>();
-        userList.add("admin");
-        userList.add("user1");
-        userList.add("user2");
-        
-        modelAndView.addObject("userList", userList);
-        return modelAndView;
-    }
-	
 
 }

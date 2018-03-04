@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ResourceUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,9 +25,11 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.netease.homework.onlineShopping.configuration.ServiceInfoUtil;
 import com.netease.homework.onlineShopping.domain.AccountItem;
+import com.netease.homework.onlineShopping.domain.BusinessLogicException;
 import com.netease.homework.onlineShopping.domain.Buyer;
 import com.netease.homework.onlineShopping.domain.CartItem;
 import com.netease.homework.onlineShopping.domain.Product;
+import com.netease.homework.onlineShopping.domain.Result;
 import com.netease.homework.onlineShopping.domain.User;
 import com.netease.homework.onlineShopping.repository.AccountItemRepository;
 import com.netease.homework.onlineShopping.repository.BuyerRepository;
@@ -54,157 +57,74 @@ public class ApiController {
 	@Autowired
 	private AccountItemRepository accountItemRepository;
 	
-	@Autowired
-	private ServiceInfoUtil serviceInfoUtil;
-	
 //	@Value("${uploadImagePath}")
 //    private String uploadImagePath;
 	
 	@RequestMapping(value = "/login")
 	@ResponseBody
-    public Object login(ModelAndView modelAndView, HttpSession session, @RequestParam String userName, @RequestParam String password)
+    public Result login(ModelAndView modelAndView, HttpSession session, @RequestParam String userName, @RequestParam String password)
     {
-		Map<String,Object> result=new HashMap<>();
+		Result result;
 		User user=apiService.getUser(userName, password);
 		
 		if(user!=null)
 		{
-			result.put("result", true);
+			result=new Result(null,200,true);
 			session.setAttribute("userId", user.getId());
 		}
 		else
 		{
-			result.put("result", false);
+			result=new Result(null,200,false);
 		}
 
-		result.put("code", 200);
         return result;
     }
 	
 	@RequestMapping(value = "/delete")
 	@ResponseBody
-	public Object delete(ModelAndView modelAndView, HttpSession session, @RequestParam Long id)
+	public Result delete(ModelAndView modelAndView, HttpSession session, @RequestParam Long id) throws BusinessLogicException
     {
-		Map<String,Object> result=new HashMap<>();
+		Result result;
 		
 		Long userId=(Long)session.getAttribute("userId");
-		if(userId==null)
-		{
-			result.put("message", "请登录！");
-        	result.put("code", 417);
-		}
-		else
-		{
-	        User user=apiService.getUser(userId);
-	        
-	        if(user ==null || user.getUsertype()!=0)
-	        {
-	        	result.put("message", "非卖家用户无权限删除商品！");
-	        	result.put("code", 417);
-	        }
-	        else
-	        {
-	        	Product product=productRepository.findById(id);
-	        	if(product==null)
-	        	{
-	        		result.put("message", "商品不存在！");
-	            	result.put("code", 417);
-	        	}
-	        	else if(apiService.isSell(product))
-	        	{
-	        		result.put("message", "已出售的商品不能删除！");
-	            	result.put("code", 417);
-	        	}
-	        	else
-	        	{
-//	        		result.put("message", "测试！");
-//	            	result.put("code", 417);
-	            	
-	        		try
-	        		{
-	        			productRepository.delete(id);
-		        		result.put("result", true);
-		            	result.put("code", 200);
-	        		}
-	        		catch(Exception e)
-	        		{
-	        			result.put("message", e.getMessage());
-		            	result.put("code", 417);
-	        		}
-	        	}
-	        }
-		}
+		User user=apiService.validateAndGetUser(userId);
+		apiService.validateSellerPrivilege(user);
+		Product product=productRepository.findById(id);
+		apiService.validateProduct(product);
+		apiService.validateIsSell(product);
+
+		productRepository.delete(id);
+		result=new Result(null,200,true);
 		
         return result;
     }
 	
-	
+	//添加到购物车
 	@RequestMapping(value = "/add")
 	@ResponseBody
-	public Object buy(ModelAndView modelAndView, HttpSession session, @RequestParam Long id, @RequestParam Integer num)
+	public Result buy(ModelAndView modelAndView, HttpSession session, @RequestParam Long id, @RequestParam Integer num) throws BusinessLogicException
     {
-		Map<String,Object> result=new HashMap<>();
-		
-		
+		Result result;
+
 		Long userId=(Long)session.getAttribute("userId");
-		if(userId==null)
+		User user=apiService.validateAndGetUser(userId);
+		Buyer buyer=apiService.validateBuyerPrivilege(user);
+    	Product product=productRepository.findById(id);
+    	apiService.validateProduct(product);
+    	apiService.validateIsBuy(buyer, product);
+    	apiService.validateNum(num);
+
+		CartItem  cartItem= cartItemRepository.findByProductAndCarter(product, buyer);
+		if(cartItem==null)
 		{
-			result.put("message", "请登录！");
-        	result.put("code", 417);
+			cartItem=new CartItem(buyer,product,num);
 		}
 		else
 		{
-	        User user=apiService.getUser(userId);
-	        
-	        if(user ==null || user.getUsertype()!=1)
-	        {
-	        	result.put("message", "非买家用户无法购买！");
-	        	result.put("code", 417);
-	        }
-	        else
-	        {
-	        	Buyer buyer=(Buyer) user;
-	        	Product product=productRepository.findById(id);
-	        	if(product==null)
-	        	{
-	        		result.put("message", "商品不存在！");
-	            	result.put("code", 417);
-	        	}
-	        	else if(apiService.isBuy(buyer, product))
-	        	{
-	        		result.put("message", "已出售的商品不能重复购买！");
-	            	result.put("code", 417);
-	        	}
-	        	else if(num<=0)
-	        	{
-	        		result.put("message", "购买数量必须大于0！");
-	            	result.put("code", 417);
-	        	}
-	        	else
-	        	{
-	        		try
-	        		{
-	        			CartItem  cartItem= cartItemRepository.findByProductAndCarter(product, buyer);
-	        			if(cartItem==null)
-	        			{
-	        				cartItem=new CartItem(buyer,product,num);
-	        			}
-	        			else
-	        			{
-	        				cartItem.setNumber(cartItem.getNumber()+num);
-	        			}
-	        			cartItemRepository.save(cartItem);
-		        		result.put("result", true);
-		            	result.put("code", 200);
-	        		}
-	        		catch(Exception e)
-	        		{
-	        			result.put("message", e.getMessage());
-		            	result.put("code", 417);
-	        		}
-	        	}
-	        }
+			cartItem.setNumber(cartItem.getNumber()+num);
 		}
+		cartItemRepository.save(cartItem);
+		result=new Result(null,200,true);
     	
     	return result;
     	
@@ -212,64 +132,30 @@ public class ApiController {
 	
 	@RequestMapping(value = "/updateItem")
 	@ResponseBody
-	public Object updateItem(ModelAndView modelAndView, HttpSession session, @RequestParam Long id, @RequestParam Integer num)
+	public Result updateItem(ModelAndView modelAndView, HttpSession session, @RequestParam Long id, @RequestParam Integer num) throws BusinessLogicException
     {
-		Map<String,Object> result=new HashMap<>();
-		
-		
+		Result result;
+
 		Long userId=(Long)session.getAttribute("userId");
-		if(userId==null)
+		User user=apiService.validateAndGetUser(userId);
+		apiService.validateBuyerPrivilege(user);
+		apiService.validateNum(num);
+
+		CartItem  cartItem= cartItemRepository.findById(id);
+		if(cartItem==null)
 		{
-			result.put("message", "请登录！");
-        	result.put("code", 417);
+			throw new BusinessLogicException("购物车项目不存在！",417);
+		}
+		else if(cartItem.getCarter().getId()!=userId)
+		{
+			throw new BusinessLogicException("购物车项目不属于该用户！",417);
 		}
 		else
 		{
-	        User user=apiService.getUser(userId);
-	        
-	        if(user ==null || user.getUsertype()!=1)
-	        {
-	        	result.put("message", "非买家用户无法购买！");
-	        	result.put("code", 417);
-	        }
-	        else
-	        {
-	        	if(num<=0)
-	        	{
-	        		result.put("message", "购买数量必须大于0！");
-	            	result.put("code", 417);
-	        	}
-	        	else
-	        	{
-	        		try
-	        		{
-	        			CartItem  cartItem= cartItemRepository.findById(id);
-	        			if(cartItem==null)
-	        			{
-	        				result.put("message", "购物车项目不存在！");
-	    	            	result.put("code", 417);
-	        			}
-	        			else if(cartItem.getCarter().getId()!=userId)
-	        			{
-	        				result.put("message", "购物车项目不属于该用户！");
-	    	            	result.put("code", 417);
-	        			}
-	        			else
-	        			{
-	        				cartItem.setNumber(num);
-	        			}
-	        			cartItemRepository.save(cartItem);
-		        		result.put("result", true);
-		            	result.put("code", 200);
-	        		}
-	        		catch(Exception e)
-	        		{
-	        			result.put("message", e.getMessage());
-		            	result.put("code", 417);
-	        		}
-	        	}
-	        }
+			cartItem.setNumber(num);
 		}
+		cartItemRepository.save(cartItem);
+		result=new Result(null,200,true);
     	
     	return result;
     	
@@ -277,55 +163,30 @@ public class ApiController {
 	
 	@RequestMapping(value = "/deleteItem")
 	@ResponseBody
-	public Object deleteItem(ModelAndView modelAndView, HttpSession session, @RequestParam Long id)
+	public Result deleteItem(ModelAndView modelAndView, HttpSession session, @RequestParam Long id) throws BusinessLogicException
     {
-		Map<String,Object> result=new HashMap<>();
-		
-		
+		Result result;
+
 		Long userId=(Long)session.getAttribute("userId");
-		if(userId==null)
+		
+		User user=apiService.validateAndGetUser(userId);
+		
+		apiService.validateBuyerPrivilege(user);
+		
+    	CartItem  cartItem= cartItemRepository.findById(id);
+		if(cartItem==null)
 		{
-			result.put("message", "请登录！");
-        	result.put("code", 417);
+			throw new BusinessLogicException("购物车项目不存在！",417);
+		}
+		else if(cartItem.getCarter().getId()!=userId)
+		{
+			throw new BusinessLogicException("购物车项目不属于该用户！",417);
 		}
 		else
 		{
-	        User user=apiService.getUser(userId);
-	        
-	        if(user ==null || user.getUsertype()!=1)
-	        {
-	        	result.put("message", "非买家用户无法操作！");
-	        	result.put("code", 417);
-	        }
-	        else
-	        {
-	        	try
-        		{
-        			CartItem  cartItem= cartItemRepository.findById(id);
-        			if(cartItem==null)
-        			{
-        				result.put("message", "购物车项目不存在！");
-    	            	result.put("code", 417);
-        			}
-        			else if(cartItem.getCarter().getId()!=userId)
-        			{
-        				result.put("message", "购物车项目不属于该用户！");
-    	            	result.put("code", 417);
-        			}
-        			else
-        			{
-        				cartItemRepository.delete(cartItem);
-        			}
-	        		result.put("result", true);
-	            	result.put("code", 200);
-        		}
-        		catch(Exception e)
-        		{
-        			result.put("message", e.getMessage());
-	            	result.put("code", 417);
-        		}
-	        }
+			cartItemRepository.delete(cartItem);
 		}
+		result=new Result(null,200,true);
     	
     	return result;
     	
@@ -334,62 +195,37 @@ public class ApiController {
 	
 	@RequestMapping(value = "/buy")
 	@ResponseBody
-	public Object buy(ModelAndView modelAndView, HttpSession session, @RequestBody List<Map<String,String>> data)
+	public Result buy(ModelAndView modelAndView, HttpSession session, @RequestBody List<Map<String,String>> data) throws BusinessLogicException
     {
-		Map<String,Object> result=new HashMap<>();
-		
+		Result result;
 		
 		Long userId=(Long)session.getAttribute("userId");
-		if(userId==null)
+		
+		User user=apiService.validateAndGetUser(userId);
+		
+		Buyer buyer=apiService.validateBuyerPrivilege(user);
+		
+		//这里要采用数据库事务！！！！！！
+		for(Map<String,String> item:data)
 		{
-			result.put("message", "请登录！");
-        	result.put("code", 417);
+			Long id=Long.valueOf(item.get("id"));
+			Integer num=Integer.valueOf(item.get("num"));
+			CartItem cartItem = cartItemRepository.findById(id);
+			if(cartItem.getCarter().getId()!=userId)//如果item不是该买家的，则返回异常
+			{
+            	throw new BusinessLogicException("请求参数有误",417);
+			}
+			AccountItem accountItem=new AccountItem();
+			accountItem.setBuyer(buyer);
+			accountItem.setBuyPrice(cartItem.getProduct().getPrice());
+			accountItem.setNumber(num);
+			accountItem.setProduct(cartItem.getProduct());
+			accountItemRepository.save(accountItem);
+			cartItemRepository.delete(cartItem);
 		}
-		else
-		{
-	        User user=apiService.getUser(userId);
-	        
-	        if(user ==null || user.getUsertype()!=1)
-	        {
-	        	result.put("message", "非买家用户无法购买！");
-	        	result.put("code", 417);
-	        }
-	        else
-	        {
-	        	Buyer buyer=(Buyer) user;
-        		try
-        		{
-        			//这里要采用数据库事务！！！！！！
-        			for(Map<String,String> item:data)
-        			{
-        				Long id=Long.valueOf(item.get("id"));
-        				Integer num=Integer.valueOf(item.get("num"));
-        				CartItem cartItem = cartItemRepository.findById(id);
-        				if(cartItem.getCarter().getId()!=userId)//如果item不是该买家的，则返回异常
-        				{
-        	            	throw new Exception("请求参数有误");
-        				}
-        				AccountItem accountItem=new AccountItem();
-        				accountItem.setBuyer(buyer);
-        				accountItem.setBuyPrice(cartItem.getProduct().getPrice());
-        				accountItem.setNumber(num);
-        				accountItem.setProduct(cartItem.getProduct());
-        				accountItemRepository.save(accountItem);
-        				cartItemRepository.delete(cartItem);
-        			}
-        			
-        			
-	        		result.put("result", true);
-	            	result.put("code", 200);
-        		}
-        		catch(Exception e)
-        		{
-        			e.printStackTrace();
-        			result.put("message", e.getMessage());
-	            	result.put("code", 417);
-        		}
-	        }
-		}
+		
+		
+		result=new Result(null,200,true);
     	
     	return result;
     	
@@ -397,50 +233,58 @@ public class ApiController {
 	
 	@RequestMapping(value = "/upload")
 	@ResponseBody
-	public Object upload(ModelAndView modelAndView, HttpSession session, @RequestParam(value="file")MultipartFile file)
+	public Result upload(ModelAndView modelAndView, HttpSession session, @RequestParam(value="file")MultipartFile file) throws BusinessLogicException, IllegalStateException, IOException
     {
-		Map<String,Object> result=new HashMap<>();
+		Result result;
 		
 		Long userId=(Long)session.getAttribute("userId");
-		if(userId==null)
+		
+		User user=apiService.validateAndGetUser(userId);
+		apiService.validateSellerPrivilege(user);
+		
+		
+		String staticResoucePath=URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(),"UTF-8").substring(1)+"static/";
+		String fileReletivePath= "images/"+userId+"/"+file.getOriginalFilename();
+		String fileAbsPath =staticResoucePath + fileReletivePath;  
+		
+//		String filePath = uploadImagePath+ "/" + file.getOriginalFilename();  
+		
+		
+		File desFile = new File(fileAbsPath);
+		//如果父目录不存在则创建
+		if(!desFile.getParentFile().exists())
 		{
-			result.put("message", "请登录！");
-        	result.put("code", 417);
+			desFile.getParentFile().mkdirs();
 		}
-		else
-		{
- 
-			try {
-				String staticResoucePath=URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(),"UTF-8").substring(1)+"static/";
-				String fileReletivePath= "images/"+userId+"/"+file.getOriginalFilename();
-				String fileAbsPath =staticResoucePath + fileReletivePath;  
-				
-//				String filePath = uploadImagePath+ "/" + file.getOriginalFilename();  
-				
-				
-				File desFile = new File(fileAbsPath);
-				//如果父目录不存在则创建
-				if(!desFile.getParentFile().exists())
-				{
-					desFile.getParentFile().mkdirs();
-				}
-				
-				file.transferTo(desFile); 
-				
-//	    		result.put("result", "http://localhost:"+ServiceInfoUtil.getPort()+"/"+fileReletivePath);
-	    		result.put("result", "http://"+ServiceInfoUtil.getIp()+":"+ServiceInfoUtil.getPort()+"/"+fileReletivePath);
-	        	
-	    		result.put("code", 200);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				result.put("message", e.getMessage());
-	        	result.put("code", 417);
-			}
-	
-		}
+		
+		file.transferTo(desFile); 
+		
+		result=new Result(null,200,"http://"+ServiceInfoUtil.getIp()+":"+ServiceInfoUtil.getPort()+"/"+fileReletivePath);
 		
 		return result;
     }
 
+	@ExceptionHandler({BusinessLogicException.class,Exception.class})
+	@ResponseBody
+	public Result handleException(Exception e) {
+		Result result;
+		if(e instanceof BusinessLogicException)
+		{
+			BusinessLogicException err=(BusinessLogicException) e;
+			result=new Result(err.getMessage(),err.getCode());
+		}
+		else
+		{
+			result=new Result(e.getMessage(),400);
+		}
+	    return result;
+	}
+	
+//	@ExceptionHandler(BusinessLogicException.class)
+//	@ResponseBody
+//	public Result handleException(BusinessLogicException e) {
+//
+//	    return new Result(e.getMessage(),e.getCode());
+//	}
+	
 }
