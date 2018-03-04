@@ -70,13 +70,22 @@
 				}
 			});
 			
-			form.addEventListener('submit',function(e){
-				if(!isSubmiting && this.check()){
-					price.value = Number(price.value);
-					isSubmiting = true;
-					form.submit();
-				}
-			}.bind(this),false);
+// $('upload').addEventListener('click', function (){
+// if(!isSubmiting && this.check()){
+// price.value = Number(price.value);
+// isSubmiting = true;
+// form.submit();
+// }
+// }
+			
+			 form.addEventListener('submit',function(e){
+				 if(!isSubmiting && this.check()){
+					 price.value = Number(price.value);
+					 isSubmiting = true;
+					 form.submit();
+				 }
+			 }.bind(this),false);
+			
 			[title,summary,image,detail,price].forEach(function(item){
 				item.addEventListener('input',function(e){
 					item.classList.remove('z-err');
@@ -84,7 +93,7 @@
 			}.bind(this));
 			image.addEventListener('input',function(e){
 				var value = image.value.trim();
-				if(value != '' && /^(http|https):\/\//.test(value) && /\.(jpg|gif|png)$/.test(value)){
+				if(value != '' && /^(http|https):\/\//.test(value) && /\.(jpeg|jpg|gif|png)$/.test(value)){
 					imgpre.src = value;
 				}
 			}.bind(this),false);
@@ -94,7 +103,7 @@
 			[
 				[title,function(value){return value.length<2 || value.length>80}],
 				[summary,function(value){return value.length<2 || value.length>140}],
-				[image,function(value){return value == '' || !(/^(http|https):\/\//.test(value) && /\.(jpg|gif|png)$/.test(value))}],
+				[image,function(value){return value == '' || !(/^(http|https):\/\//.test(value) && /\.(jpeg|jpg|gif|png)$/.test(value))}],
 				[detail,function(value){return value.length<2 || value.length>1000}],
 				[price,function(value){return value == '' || !Number(value)}]
 			].forEach(function(item){

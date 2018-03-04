@@ -427,8 +427,10 @@ public class ApiController {
 				
 				file.transferTo(desFile); 
 				
-	    		result.put("result", "http://localhost:"+ServiceInfoUtil.getPort()+"/"+fileReletivePath);
-	        	result.put("code", 200);
+//	    		result.put("result", "http://localhost:"+ServiceInfoUtil.getPort()+"/"+fileReletivePath);
+	    		result.put("result", "http://"+ServiceInfoUtil.getIp()+":"+ServiceInfoUtil.getPort()+"/"+fileReletivePath);
+	        	
+	    		result.put("code", 200);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
