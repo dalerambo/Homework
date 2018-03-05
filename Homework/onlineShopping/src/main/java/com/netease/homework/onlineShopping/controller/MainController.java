@@ -65,14 +65,24 @@ public class MainController {
         		{
                 	for(Product product:productRepository.findAll())
                 	{
-                		productViewList.add(new ProductView(product,null,apiService.isSell(product)));
+                		ProductView productView=new ProductView(product,null,apiService.isSell(product));
+                		int num=apiService.getSellNumber(product);
+                		if(num!=0)
+                			productView.setNum(num);
+                				
+                		productViewList.add(productView);
                 	}
         		}
         		else//展示卖家自己发布的产品，已出售的带有“已出售”标签
         		{
                 	for(Product product:seller.getProducts())
                 	{
-                		productViewList.add(new ProductView(product,null,apiService.isSell(product)));
+                		ProductView productView=new ProductView(product,null,apiService.isSell(product));
+                		int num=apiService.getSellNumber(product);
+                		if(num!=0)
+                			productView.setNum(num);
+                				
+                		productViewList.add(productView);
                 	}
         		}
         	}
@@ -293,21 +303,6 @@ public class MainController {
         
         modelAndView.setViewName("cart");
         
-        return modelAndView;
-    }
-	
-	@RequestMapping(value = "/test")
-    public ModelAndView test(ModelAndView modelAndView)
-    {
-    	
-        modelAndView.setViewName("test");
-        
-        List<String> userList=new ArrayList<String>();
-        userList.add("admin");
-        userList.add("user1");
-        userList.add("user2");
-        
-        modelAndView.addObject("userList", userList);
         return modelAndView;
     }
 	

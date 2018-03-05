@@ -14,6 +14,9 @@ public class ProductView {
     //购买时的价格
     private Double buyPrice;
     
+	//已出售的数量
+    private Integer num;
+    
     public ProductView(Product product)
     {
     	this.product=product;
@@ -64,5 +67,13 @@ public class ProductView {
 
 	public void setBuyPrice(Double buyPrice) {
 		this.buyPrice = buyPrice;
+	}
+	
+    public Integer getNum() {
+		return num;
+	}
+
+	public void setNum(Integer num) {
+		this.num = num;
 	}
 }
