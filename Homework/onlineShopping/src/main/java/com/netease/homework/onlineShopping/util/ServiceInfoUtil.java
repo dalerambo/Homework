@@ -1,4 +1,4 @@
-package com.netease.homework.onlineShopping.configuration;
+package com.netease.homework.onlineShopping.util;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

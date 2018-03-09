@@ -3,19 +3,15 @@ package com.netease.homework.onlineShopping.controller;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.netease.homework.onlineShopping.configuration.ServiceInfoUtil;
+import com.netease.homework.onlineShopping.util.ServiceInfoUtil;
 import com.netease.homework.onlineShopping.domain.AccountItem;
 import com.netease.homework.onlineShopping.domain.BusinessLogicException;
 import com.netease.homework.onlineShopping.domain.Buyer;
@@ -35,7 +31,6 @@ import com.netease.homework.onlineShopping.repository.AccountItemRepository;
 import com.netease.homework.onlineShopping.repository.BuyerRepository;
 import com.netease.homework.onlineShopping.repository.CartItemRepository;
 import com.netease.homework.onlineShopping.repository.ProductRepository;
-import com.netease.homework.onlineShopping.repository.SellerRepository;
 import com.netease.homework.onlineShopping.service.ApiService;
 
 @Controller
