@@ -43,50 +43,41 @@ public class PageController {
 
 		//添加productViewList参数
 		List<ProductView> productViewList=new ArrayList<>();
+		Iterable<Product> productList;
 
 		if(user!=null)//已经登录的
 		{
 			if(user.getUsertype()==0)//卖家
 			{
 				Seller seller=(Seller) user;
+
 				if(!(type!=null && type==1))//展示所有卖家发布的产品，已出售的带有“已出售”标签
 				{
-					for(Product product:productRepository.findAll())
-					{
-						ProductView productView=new ProductView(product,null,businessService.isSell(product));
-						int num=businessService.getSellNumber(product);
-						if(num!=0)
-							productView.setNum(num);
-
-						productViewList.add(productView);
-					}
+					productList=productRepository.findAll();
 				}
 				else//展示卖家自己发布的产品，已出售的带有“已出售”标签
 				{
-					for(Product product:seller.getProducts())
-					{
-						ProductView productView=new ProductView(product,null,businessService.isSell(product));
-						int num=businessService.getSellNumber(product);
-						if(num!=0)
-							productView.setNum(num);
+					productList=seller.getProducts();
+				}
 
-						productViewList.add(productView);
-					}
+				for(Product product:productList)
+				{
+					ProductView productView=new ProductView(product,null,businessService.isSell(product));
+					int num=businessService.getSellNumber(product);
+					if(num!=0)
+						productView.setNum(num);
+
+					productViewList.add(productView);
 				}
 			}
 			else//买家
 			{
 				Buyer buyer=(Buyer) user;
 
-//        		//让前台处理“已购买”标签以及已购买物品的显示
-//            	for(Product product:productRepository.findAll())
-//            	{
-//            		productViewList.add(new ProductView(product,businessService.isBuy(buyer, product),null));
-//            	}
-
 				if(!(type!=null && type==1))//展示所有产品信息，已购买项目带有“已购买”标签
 				{
-					for(Product product:productRepository.findAll())
+					productList=productRepository.findAll();
+					for(Product product:productList)
 					{
 						ProductView productView=new ProductView(product,businessService.isBuy(buyer, product),null);
 						productViewList.add(productView);
@@ -94,7 +85,8 @@ public class PageController {
 				}
 				else//展示买家还没有购买的内容页面
 				{
-					for(Product product:productRepository.findAll())
+					productList=productRepository.findAll();
+					for(Product product:productList)
 					{
 						if(!businessService.isBuy(buyer, product))
 							productViewList.add(new ProductView(product,false,null));
@@ -105,10 +97,10 @@ public class PageController {
 		else//未登录
 		{
 			//展示所有卖家发布的产品信息，没有带“已购买”、“已出售”标签
-			for(Product product:productRepository.findAll())
+			productList=productRepository.findAll();
+			for(Product product:productList)
 			{
 				productViewList.add(new ProductView(product,null,null));
-//        		productViewList.add(new ProductView(product,true,true));
 			}
 		}
 
