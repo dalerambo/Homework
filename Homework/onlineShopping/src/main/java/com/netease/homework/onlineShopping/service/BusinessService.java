@@ -1,21 +1,18 @@
 package com.netease.homework.onlineShopping.service;
 
-import java.util.List;
-
-import com.netease.homework.onlineShopping.exception.ApiAuthorizationException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.netease.homework.onlineShopping.domain.AccountItem;
-import com.netease.homework.onlineShopping.exception.BusinessLogicException;
 import com.netease.homework.onlineShopping.domain.Buyer;
 import com.netease.homework.onlineShopping.domain.Product;
 import com.netease.homework.onlineShopping.domain.User;
+import com.netease.homework.onlineShopping.exception.BusinessLogicException;
 import com.netease.homework.onlineShopping.repository.AccountItemRepository;
 import com.netease.homework.onlineShopping.repository.BuyerRepository;
 import com.netease.homework.onlineShopping.repository.SellerRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @Service
 public class BusinessService {
@@ -79,29 +76,6 @@ public class BusinessService {
 		}
 
 		return num;
-	}
-
-	//检查用户是否登录，并返回用户
-	public User validateAndGetUser(Long userId) throws ApiAuthorizationException {
-		if (userId == null) {
-			throw ApiAuthorizationException.REQUIRE_LOGIN;
-		} else {
-			return getUser(userId);
-		}
-	}
-
-	public void validateSellerPrivilege(User user) throws ApiAuthorizationException {
-		if (user == null || user.getUsertype() != 0) {
-			throw ApiAuthorizationException.REQUIRE_SELLER;
-		}
-	}
-
-	public Buyer validateBuyerPrivilege(User user) throws ApiAuthorizationException {
-		if (user == null || user.getUsertype() != 1) {
-			throw ApiAuthorizationException.REQUIRE_BUYER;
-		} else {
-			return (Buyer) user;
-		}
 	}
 
 	public void validateProduct(Product product) throws BusinessLogicException {

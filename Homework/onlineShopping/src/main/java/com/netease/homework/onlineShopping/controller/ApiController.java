@@ -1,19 +1,19 @@
 package com.netease.homework.onlineShopping.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpSession;
-
 import com.netease.homework.onlineShopping.annotation.AuthorityEnum;
 import com.netease.homework.onlineShopping.annotation.Authorization;
 import com.netease.homework.onlineShopping.annotation.QueryTypeEnum;
-import com.netease.homework.onlineShopping.exception.ApiAuthorizationException;
+import com.netease.homework.onlineShopping.domain.*;
+import com.netease.homework.onlineShopping.exception.BusinessLogicException;
+import com.netease.homework.onlineShopping.repository.AccountItemRepository;
+import com.netease.homework.onlineShopping.repository.CartItemRepository;
+import com.netease.homework.onlineShopping.repository.ProductRepository;
+import com.netease.homework.onlineShopping.result.Result;
+import com.netease.homework.onlineShopping.service.BusinessService;
+import com.netease.homework.onlineShopping.util.ServiceInfoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,19 +21,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.netease.homework.onlineShopping.util.ServiceInfoUtil;
-import com.netease.homework.onlineShopping.domain.AccountItem;
-import com.netease.homework.onlineShopping.exception.BusinessLogicException;
-import com.netease.homework.onlineShopping.domain.Buyer;
-import com.netease.homework.onlineShopping.domain.CartItem;
-import com.netease.homework.onlineShopping.domain.Product;
-import com.netease.homework.onlineShopping.result.Result;
-import com.netease.homework.onlineShopping.domain.User;
-import com.netease.homework.onlineShopping.repository.AccountItemRepository;
-import com.netease.homework.onlineShopping.repository.BuyerRepository;
-import com.netease.homework.onlineShopping.repository.CartItemRepository;
-import com.netease.homework.onlineShopping.repository.ProductRepository;
-import com.netease.homework.onlineShopping.service.BusinessService;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/api")
@@ -41,9 +34,6 @@ public class ApiController {
     
 	@Autowired
 	private BusinessService businessService;
-	
-    @Autowired
-	private BuyerRepository buyerRepository;
 	
 	@Autowired
 	private ProductRepository productRepository;
@@ -97,7 +87,7 @@ public class ApiController {
 	@RequestMapping(value = "/upload")
 	@ResponseBody
 	@Authorization(authority = AuthorityEnum.Seller, queryType = QueryTypeEnum.Api)
-	public Result upload(HttpSession session, @RequestParam(value="file")MultipartFile file) throws IllegalStateException, IOException, ApiAuthorizationException {
+	public Result upload(HttpSession session, @RequestParam(value="file")MultipartFile file) throws IllegalStateException, IOException {
 		Result result;
 
 		Long userId=(Long)session.getAttribute("userId");
@@ -129,7 +119,7 @@ public class ApiController {
 	@RequestMapping(value = "/add")
 	@ResponseBody
 	@Authorization(authority = AuthorityEnum.Buyer, queryType = QueryTypeEnum.Api)
-	public Result buy(HttpSession session, @RequestParam Long id, @RequestParam Integer num) throws BusinessLogicException,ApiAuthorizationException
+	public Result buy(HttpSession session, @RequestParam Long id, @RequestParam Integer num) throws BusinessLogicException
     {
 		Result result;
 
@@ -158,7 +148,7 @@ public class ApiController {
 	@RequestMapping(value = "/updateItem")
 	@ResponseBody
 	@Authorization(authority = AuthorityEnum.Buyer, queryType = QueryTypeEnum.Api)
-	public Result updateItem(HttpSession session, @RequestParam Long id, @RequestParam Integer num) throws BusinessLogicException,ApiAuthorizationException
+	public Result updateItem(HttpSession session, @RequestParam Long id, @RequestParam Integer num) throws BusinessLogicException
     {
 		Result result;
 
@@ -170,7 +160,7 @@ public class ApiController {
 		{
 			throw BusinessLogicException.CARTITEM_NOT_EXIST;
 		}
-		else if(cartItem.getCarter().getId()!=userId)
+		else if(!cartItem.getCarter().getId().equals(userId))
 		{
 			throw BusinessLogicException.CARTITEM_NOT_BELONG_TO_USER;
 		}
@@ -188,7 +178,7 @@ public class ApiController {
 	@RequestMapping(value = "/deleteItem")
 	@ResponseBody
 	@Authorization(authority = AuthorityEnum.Buyer, queryType = QueryTypeEnum.Api)
-	public Result deleteItem(HttpSession session, @RequestParam Long id) throws BusinessLogicException,ApiAuthorizationException
+	public Result deleteItem(HttpSession session, @RequestParam Long id) throws BusinessLogicException
     {
 		Result result;
 
@@ -199,7 +189,7 @@ public class ApiController {
 		{
 			throw BusinessLogicException.CARTITEM_NOT_EXIST;
 		}
-		else if(cartItem.getCarter().getId()!=userId)
+		else if(!cartItem.getCarter().getId().equals(userId))
 		{
 			throw BusinessLogicException.CARTITEM_NOT_BELONG_TO_USER;
 		}
@@ -217,7 +207,8 @@ public class ApiController {
 	@RequestMapping(value = "/buy")
 	@ResponseBody
 	@Authorization(authority = AuthorityEnum.Buyer, queryType = QueryTypeEnum.Api)
-	public Result buy(HttpSession session, @RequestBody List<Map<String,String>> data) throws BusinessLogicException,ApiAuthorizationException
+	@Transactional
+	public Result buy(HttpSession session, @RequestBody List<Map<String,String>> data) throws BusinessLogicException
     {
 		Result result;
 		
@@ -231,7 +222,7 @@ public class ApiController {
 			Long id=Long.valueOf(item.get("id"));
 			Integer num=Integer.valueOf(item.get("num"));
 			CartItem cartItem = cartItemRepository.findById(id);
-			if(cartItem.getCarter().getId()!=userId)//如果item不是该买家的，则返回异常
+			if(!cartItem.getCarter().getId().equals(userId))//如果item不是该买家的，则返回异常
 			{
             	throw BusinessLogicException.REQUEST_PARAM_ERROR;
 			}

@@ -1,42 +1,30 @@
 package com.netease.homework.onlineShopping.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import com.netease.homework.onlineShopping.annotation.AuthorityEnum;
-import com.netease.homework.onlineShopping.annotation.QueryTypeEnum;
 import com.netease.homework.onlineShopping.annotation.Authorization;
+import com.netease.homework.onlineShopping.annotation.QueryTypeEnum;
+import com.netease.homework.onlineShopping.domain.Buyer;
+import com.netease.homework.onlineShopping.domain.Product;
+import com.netease.homework.onlineShopping.domain.Seller;
+import com.netease.homework.onlineShopping.domain.User;
+import com.netease.homework.onlineShopping.repository.AccountItemRepository;
+import com.netease.homework.onlineShopping.repository.ProductRepository;
+import com.netease.homework.onlineShopping.result.ProductView;
+import com.netease.homework.onlineShopping.service.BusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.netease.homework.onlineShopping.domain.Product;
-import com.netease.homework.onlineShopping.result.ProductView;
-import com.netease.homework.onlineShopping.domain.Seller;
-import com.netease.homework.onlineShopping.domain.Buyer;
-import com.netease.homework.onlineShopping.domain.User;
-import com.netease.homework.onlineShopping.repository.BuyerRepository;
-import com.netease.homework.onlineShopping.repository.AccountItemRepository;
-import com.netease.homework.onlineShopping.repository.ProductRepository;
-import com.netease.homework.onlineShopping.repository.SellerRepository;
-import com.netease.homework.onlineShopping.service.BusinessService;
+import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping("/")
 public class PageController {
 
-	@Autowired
-	private SellerRepository sellerRepository;
-	
-    @Autowired
-	private BuyerRepository buyerRepository;
-    
     @Autowired
 	private ProductRepository productRepository;
     
