@@ -212,17 +212,8 @@ public class PageController {
     {
 		Seller seller=(Seller)businessService.getUserFromSession(session);
 		modelAndView.addObject("user", seller);
-		if(seller!=null)
-		{
-			product.setSeller(seller);
-			productRepository.save(product);
-		}
-		else
-		{
-			product=null;
-			modelAndView.addObject("product", product);
-			modelAndView.addObject("message", "请先登录");
-		}
+		product.setSeller(seller);
+		productRepository.save(product);
 		
         modelAndView.setViewName("publicSubmit");
         
@@ -250,18 +241,9 @@ public class PageController {
     {
 		Seller seller=(Seller)businessService.getUserFromSession(session);
 		modelAndView.addObject("user", seller);
-		if(seller!=null)
-		{
-			product.setSeller(seller);
-			product.setId(id);
-			productRepository.save(product);
-		}
-		else
-		{
-			product=null;
-			modelAndView.addObject("product", product);
-			modelAndView.addObject("message", "请先登录");
-		}
+		product.setSeller(seller);
+		product.setId(id);
+		productRepository.save(product);
 		
         modelAndView.setViewName("editSubmit");
         
@@ -274,12 +256,9 @@ public class PageController {
     {
         User user=businessService.getUserFromSession(session);
         modelAndView.addObject("user", user);
-        
-        if(user !=null && user.getUsertype()==1)
-        {
-        	Buyer buyer = (Buyer) user;
-        	modelAndView.addObject("itemList", buyer.getAccount());
-        }
+
+		Buyer buyer = (Buyer) user;
+		modelAndView.addObject("itemList", buyer.getAccount());
         
         modelAndView.setViewName("account");
         
@@ -292,22 +271,13 @@ public class PageController {
     {
         User user=businessService.getUserFromSession(session);
         modelAndView.addObject("user", user);
-        
-        if(user !=null && user.getUsertype()==1)
-        {
-        	Buyer buyer = (Buyer) user;
-        	modelAndView.addObject("itemList", buyer.getCart());
-        }
+
+		Buyer buyer = (Buyer) user;
+		modelAndView.addObject("itemList", buyer.getCart());
         
         modelAndView.setViewName("cart");
         
         return modelAndView;
     }
-
-//    private User getUserFromRequest(HttpServletRequest httpServletRequest)
-//	{
-//		Object user=httpServletRequest.getAttribute("user");
-//		return user==null?null:(User)user;
-//	}
 
 }

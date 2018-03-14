@@ -80,13 +80,10 @@ public class ApiController {
 	@RequestMapping(value = "/delete")
 	@ResponseBody
 	@Authorization(authority = AuthorityEnum.Seller, queryType = QueryTypeEnum.Api)
-	public Result delete(HttpSession session, @RequestParam Long id) throws BusinessLogicException,ApiAuthorizationException
+	public Result delete(@RequestParam Long id) throws BusinessLogicException
     {
 		Result result;
-		
-		Long userId=(Long)session.getAttribute("userId");
-		User user=businessService.validateAndGetUser(userId);
-		businessService.validateSellerPrivilege(user);
+
 		Product product=productRepository.findById(id);
 		businessService.validateProduct(product);
 		businessService.validateIsSell(product);
@@ -104,9 +101,6 @@ public class ApiController {
 		Result result;
 
 		Long userId=(Long)session.getAttribute("userId");
-
-		User user=businessService.validateAndGetUser(userId);
-		businessService.validateSellerPrivilege(user);
 
 
 		String staticResoucePath=URLDecoder.decode(ResourceUtils.getURL("classpath:").getPath(),"UTF-8").substring(1)+"static/";
@@ -139,9 +133,7 @@ public class ApiController {
     {
 		Result result;
 
-		Long userId=(Long)session.getAttribute("userId");
-		User user=businessService.validateAndGetUser(userId);
-		Buyer buyer=businessService.validateBuyerPrivilege(user);
+		Buyer buyer=(Buyer) businessService.getUserFromSession(session);
     	Product product=productRepository.findById(id);
     	businessService.validateProduct(product);
     	businessService.validateIsBuy(buyer, product);
@@ -171,8 +163,6 @@ public class ApiController {
 		Result result;
 
 		Long userId=(Long)session.getAttribute("userId");
-		User user=businessService.validateAndGetUser(userId);
-		businessService.validateBuyerPrivilege(user);
 		businessService.validateNum(num);
 
 		CartItem  cartItem= cartItemRepository.findById(id);
@@ -204,10 +194,6 @@ public class ApiController {
 
 		Long userId=(Long)session.getAttribute("userId");
 		
-		User user=businessService.validateAndGetUser(userId);
-		
-		businessService.validateBuyerPrivilege(user);
-		
     	CartItem  cartItem= cartItemRepository.findById(id);
 		if(cartItem==null)
 		{
@@ -236,10 +222,8 @@ public class ApiController {
 		Result result;
 		
 		Long userId=(Long)session.getAttribute("userId");
-		
-		User user=businessService.validateAndGetUser(userId);
-		
-		Buyer buyer=businessService.validateBuyerPrivilege(user);
+
+		Buyer buyer=(Buyer)businessService.getUserFromSession(session);
 		
 		//这里要采用数据库事务！！！！！！
 		for(Map<String,String> item:data)
