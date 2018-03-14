@@ -12,10 +12,13 @@ public class Buyer extends User{
 	
 	//购物车中包含的项目
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="carter")
+//	@OneToMany(fetch = FetchType.EAGER, mappedBy="carter")
 	private List<CartItem> cart;
+
 	
 	//账务中包含的项目
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="buyer")
+//	@OneToMany(fetch = FetchType.EAGER, mappedBy="buyer")
 	private List<AccountItem> account;
 	
 	public List<CartItem> getCart() {

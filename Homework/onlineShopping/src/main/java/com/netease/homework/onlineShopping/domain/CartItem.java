@@ -9,6 +9,7 @@ public class CartItem extends Item{
 
     //加入购物车的用户
     @ManyToOne(fetch = FetchType.LAZY)
+//	@ManyToOne(fetch = FetchType.EAGER)
     private Buyer carter;
     
     

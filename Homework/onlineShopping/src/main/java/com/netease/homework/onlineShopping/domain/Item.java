@@ -21,6 +21,7 @@ public abstract class Item {
     
     //商品项目包含的商品（一个product可能对应多个item，item是购物车或账目中的项目）
     @ManyToOne(fetch = FetchType.LAZY)
+//	@ManyToOne(fetch = FetchType.EAGER)
     private Product product;
     
     //商品项目购买时间

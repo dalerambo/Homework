@@ -2,21 +2,23 @@ package com.netease.homework.onlineShopping.service;
 
 import java.util.List;
 
+import com.netease.homework.onlineShopping.exception.ApiAuthorizationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.netease.homework.onlineShopping.domain.AccountItem;
-import com.netease.homework.onlineShopping.domain.BusinessLogicException;
+import com.netease.homework.onlineShopping.exception.BusinessLogicException;
 import com.netease.homework.onlineShopping.domain.Buyer;
 import com.netease.homework.onlineShopping.domain.Product;
-import com.netease.homework.onlineShopping.domain.Seller;
 import com.netease.homework.onlineShopping.domain.User;
 import com.netease.homework.onlineShopping.repository.AccountItemRepository;
 import com.netease.homework.onlineShopping.repository.BuyerRepository;
 import com.netease.homework.onlineShopping.repository.SellerRepository;
 
+import javax.servlet.http.HttpSession;
+
 @Service
-public class ApiService {
+public class BusinessService {
 
 	@Autowired
 	private SellerRepository sellerRepository;
@@ -46,6 +48,13 @@ public class ApiService {
 		return user;
 	}
 
+	//从session中获得userId并获得user
+	public User getUserFromSession(HttpSession session)
+	{
+		Long userId=(Long)session.getAttribute("userId");
+		return getUser(userId);
+	}
+
 	// 货物是否已经被指定买家购买
 	public boolean isBuy(Buyer buyer, Product product) {
 		// return !accountItemRepository.findByProductAndBuyer(product,
@@ -72,23 +81,24 @@ public class ApiService {
 		return num;
 	}
 
-	public User validateAndGetUser(Long userId) throws BusinessLogicException {
+	//检查用户是否登录，并返回用户
+	public User validateAndGetUser(Long userId) throws ApiAuthorizationException {
 		if (userId == null) {
-			throw new BusinessLogicException("请登录！", 417);
+			throw ApiAuthorizationException.REQUIRE_LOGIN;
 		} else {
 			return getUser(userId);
 		}
 	}
 
-	public void validateSellerPrivilege(User user) throws BusinessLogicException {
+	public void validateSellerPrivilege(User user) throws ApiAuthorizationException {
 		if (user == null || user.getUsertype() != 0) {
-			throw new BusinessLogicException("非卖家用户无权限！", 417);
+			throw ApiAuthorizationException.REQUIRE_SELLER;
 		}
 	}
 
-	public Buyer validateBuyerPrivilege(User user) throws BusinessLogicException {
+	public Buyer validateBuyerPrivilege(User user) throws ApiAuthorizationException {
 		if (user == null || user.getUsertype() != 1) {
-			throw new BusinessLogicException("非买家用户无权限！", 417);
+			throw ApiAuthorizationException.REQUIRE_BUYER;
 		} else {
 			return (Buyer) user;
 		}
@@ -96,25 +106,25 @@ public class ApiService {
 
 	public void validateProduct(Product product) throws BusinessLogicException {
 		if (product == null) {
-			throw new BusinessLogicException("商品不存在！", 417);
+			throw BusinessLogicException.PRODUCT_NOT_EXIST;
 		}
 	}
 
 	public void validateIsBuy(Buyer buyer, Product product) throws BusinessLogicException {
 		if (isBuy(buyer, product)) {
-			throw new BusinessLogicException("商品已购买！", 417);
+			throw BusinessLogicException.PRODUCT_ALREADY_BOUGHT;
 		}
 	}
 	
 	public void validateIsSell(Product product) throws BusinessLogicException {
 		if (isSell(product)) {
-			throw new BusinessLogicException("商品出售！", 417);
+			throw BusinessLogicException.PRODUCT_SOLD_OUT;
 		}
 	}
 
 	public void validateNum(Integer num) throws BusinessLogicException {
 		if (num <= 0) {
-			throw new BusinessLogicException("数量必须大于0！", 417);
+			throw BusinessLogicException.NUM_MUST_POSITIVE;
 		}
 	}
 }

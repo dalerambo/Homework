@@ -18,8 +18,9 @@ public class Seller extends User{
 		this.products = products;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY,mappedBy="seller")    
-    private List<Product> products;  
+	@OneToMany(fetch = FetchType.LAZY,mappedBy="seller")
+//	@OneToMany(fetch = FetchType.EAGER, mappedBy="seller")
+	private List<Product> products;
 	
 	@Override
 	public int getUsertype() {

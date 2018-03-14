@@ -1,4 +1,6 @@
-package com.netease.homework.onlineShopping.domain;
+package com.netease.homework.onlineShopping.result;
+
+import com.netease.homework.onlineShopping.domain.Product;
 
 //用于展示product的包装类
 public class ProductView {

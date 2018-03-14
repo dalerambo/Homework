@@ -30,6 +30,7 @@ public class Product {
 
 	// 商品发布的卖家
 	@ManyToOne(fetch = FetchType.LAZY)
+//	@ManyToOne(fetch = FetchType.EAGER)
 	private Seller seller;
 
 	public String getTitle() {

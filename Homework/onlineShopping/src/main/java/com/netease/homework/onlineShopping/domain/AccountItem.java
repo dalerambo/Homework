@@ -9,6 +9,7 @@ public class AccountItem extends Item{
 
     //买家
     @ManyToOne(fetch = FetchType.LAZY)
+//	@ManyToOne(fetch = FetchType.EAGER)
     private Buyer buyer;
     
     //商品项目购买时的价格

@@ -1,4 +1,4 @@
-package com.netease.homework.onlineShopping.domain;
+package com.netease.homework.onlineShopping.result;
 
 public class Result {
 

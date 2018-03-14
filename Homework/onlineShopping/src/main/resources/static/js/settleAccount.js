@@ -45,6 +45,11 @@
 		for (var i = 1, rows = itemListTable.rows.length; i < rows-1; i++) {
 			var id=itemListTable.rows[i].dataset.id;
 			var num=itemListTable.rows[i].cells[2].innerText;
+
+
+            var length=num.length;
+            num=num.substr(1,length-2);
+
 			buyData[i-1]={id:id,num:num};
 		}
 		
